@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Author, Category } from "@/lib/generated/prisma";
 
 export async function POST(request: Request) {
   try {
@@ -68,8 +69,8 @@ export async function POST(request: Request) {
         stock: 120,
         description: "Büyük Birader seni izliyor.",
         coverImage: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=1000&auto=format&fit=crop",
-        authorId: createdAuthors.find(a => a.name === "George Orwell")!.id,
-        categoryId: createdCategories.find(c => c.name === "Bilim Kurgu & Distopya")!.id,
+        authorId: createdAuthors.find((a: Author) => a.name === "George Orwell")!.id,
+        categoryId: createdCategories.find((c: Category) => c.name === "Bilim Kurgu & Distopya")!.id,
       },
       {
         title: "Hobbit",
@@ -78,8 +79,8 @@ export async function POST(request: Request) {
         stock: 50,
         description: "Bilbo Baggins'in beklenmedik yolculuğu.",
         coverImage: "https://images.unsplash.com/photo-1621351183012-e2f9972dd9bf?q=80&w=1000&auto=format&fit=crop",
-        authorId: createdAuthors.find(a => a.name === "J.R.R. Tolkien")!.id,
-        categoryId: createdCategories.find(c => c.name === "Fantastik")!.id,
+        authorId: createdAuthors.find((a: Author) => a.name === "J.R.R. Tolkien")!.id,
+        categoryId: createdCategories.find((c: Category) => c.name === "Fantastik")!.id,
       },
       {
         title: "Clean Code",
@@ -88,8 +89,8 @@ export async function POST(request: Request) {
         stock: 30,
         description: "Sürdürülebilir yazılım için altın kurallar.",
         coverImage: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=1000&auto=format&fit=crop",
-        authorId: createdAuthors.find(a => a.name === "Robert C. Martin")!.id,
-        categoryId: createdCategories.find(c => c.name === "Yazılım & Teknoloji")!.id,
+        authorId: createdAuthors.find((a: Author) => a.name === "Robert C. Martin")!.id,
+        categoryId: createdCategories.find((c: Category) => c.name === "Yazılım & Teknoloji")!.id,
       },
       {
         title: "Simyacı",
@@ -98,8 +99,8 @@ export async function POST(request: Request) {
         stock: 200,
         description: "Kendi kişisel menkıbeni bul.",
         coverImage: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1000&auto=format&fit=crop",
-        authorId: createdAuthors.find(a => a.name === "Paulo Coelho")!.id,
-        categoryId: createdCategories.find(c => c.name === "Kişisel Gelişim")!.id,
+        authorId: createdAuthors.find((a: Author) => a.name === "Paulo Coelho")!.id,
+        categoryId: createdCategories.find((c: Category) => c.name === "Kişisel Gelişim")!.id,
       },
       {
         title: "Muhteşem Gatsby",
@@ -108,8 +109,8 @@ export async function POST(request: Request) {
         stock: 75,
         description: "Caz çağının parıltısı ve trajedisi.",
         coverImage: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=1000&auto=format&fit=crop",
-        authorId: createdAuthors.find(a => a.name === "F. Scott Fitzgerald")!.id,
-        categoryId: createdCategories.find(c => c.name === "Dünya Klasikleri")!.id,
+        authorId: createdAuthors.find((a: Author) => a.name === "F. Scott Fitzgerald")!.id,
+        categoryId: createdCategories.find((c: Category) => c.name === "Dünya Klasikleri")!.id,
       },
     ];
 

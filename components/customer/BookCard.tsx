@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
 import { useApp } from '@/lib/store'
@@ -14,6 +14,18 @@ interface BookCardProps {
 export default function BookCard({ book }: BookCardProps) {
   const { userRole, addToCart, favoriteIds, toggleFavorite, openBook, addToast } = useApp()
   const [added, setAdded] = useState(false)
+  const [clientData, setClientData] = useState<{ rating: number; reviewCount: number } | null>(null)
+
+  useEffect(() => {
+    setClientData({
+      rating: 4 + Math.random() * 0.9,
+      reviewCount: Math.floor(100 + Math.random() * 900)
+    })
+  }, [])
+
+  const rating = clientData?.rating || 5
+  const reviewCount = clientData?.reviewCount || 0
+
   const isFav = favoriteIds.has(book.id)
   const isLoggedIn = userRole !== 'guest'
 
@@ -29,9 +41,6 @@ export default function BookCard({ book }: BookCardProps) {
     e.stopPropagation()
     toggleFavorite(book.id)
   }
-
-  const rating = 4 + Math.random() * 0.9
-  const reviewCount = Math.floor(100 + Math.random() * 900)
 
   return (
     <div

@@ -1,4 +1,4 @@
-import { PrismaClient, Author, Category } from "@prisma/client";
+import { PrismaClient, Author, Category } from "@/lib/generated/prisma";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import "dotenv/config";
 
