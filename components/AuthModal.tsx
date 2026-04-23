@@ -27,7 +27,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
 
     // Role simulation logic
-    const isAdmin = email === 'admin@bookflow.com'
+    const isAdmin = email === 'admin@kitapussu.com' && password === '1234'
     const role = isAdmin ? 'admin' : 'customer'
 
     login(role, email, tab === 'register' ? name : undefined)
