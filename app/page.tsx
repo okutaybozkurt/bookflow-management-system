@@ -5,6 +5,8 @@ import CustomerPage from '@/components/customer/CustomerPage'
 import AdminLayout from '@/components/admin/AdminLayout'
 import ToastContainer from '@/components/ToastContainer'
 
+import AdminResetHandler from '@/components/AdminResetHandler'
+
 function AppRouter() {
   const { userRole } = useApp()
 
@@ -18,6 +20,7 @@ function AppRouter() {
 export default function Home() {
   return (
     <AppProvider>
+      <AdminResetHandler />
       <AppRouter />
       <ToastContainer />
     </AppProvider>

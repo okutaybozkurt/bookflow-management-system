@@ -12,18 +12,18 @@ Bu dosya projenin mutfağındaki iş listesidir.
 
 ---
 
-## 2. Aşama: Backend ve Veri Mimarisi (Şu An Buradayız 📍)
-- [ ] Backend Teknolojisi Seçimi: (Örn: Node.js/Next.js API veya Laravel).
-- [ ] Veritabanı Tasarımı: Kitaplar, Kategoriler, Yazarlar ve Kullanıcılar tablolarının ilişkisel şeması.
-- [ ] Auth (Yetkilendirme): admin@kitapussu.com için özel yetkilendirme katmanı.
-- [ ] Dinamik Veri Akışı: Arama ve Kategori filtreleme kısımlarının gerçek veritabanına bağlanması.
+## 2. Aşama: Backend ve Veri Mimarisi (Tamamlandı ✅)
+- [x] Backend Teknolojisi Seçimi: Next.js API Handlers + Prisma + SQLite.
+- [x] Veritabanı Tasarımı: Kitaplar, Kategoriler, Yazarlar ve Kullanıcılar modelleri kuruldu.
+- [x] Auth (Yetkilendirme): Admin ve User rolleri şemaya eklendi.
+- [x] Dinamik Veri Akışı: Kitap verileri veritabanından çekilmeye başlandı.
 
 ---
 
-## 3. Aşama: "Admin Reset" ve Mühendislik Dokunuşları (Kritik 🛠️)
-- [ ] Sunum Modu (Reset Mechanism): Hocanın istediği o "Kirli Veri -> Temiz Veri" geçişini sağlayacak backend tetikleyicisinin yazılması.
-- [ ] Seeder Yapılandırması: PresentationSeeder (Altın Veri) ve DevelopmentSeeder (Test Verisi) ayrımı.
-- [ ] Kısayol Entegrasyonu: Ctrl + Shift + R gibi bir kombinasyonla sistemin anında sıfırlanıp profesyonel hale getirilmesi.
+## 3. Aşama: "Admin Reset" ve Mühendislik Dokunuşları (Şu An Buradayız 📍)
+- [x] Sunum Modu (Reset Mechanism): /api/admin/reset endpoint'i hazırlandı.
+- [x] Seeder Yapılandırması: prisma/seed.ts ile Altın Veri (Golden Data) kurgulandı.
+- [x] Kısayol Entegrasyonu: Ctrl + Shift + R kısayolu ile sistem anında sıfırlanabiliyor.
 
 ---
 

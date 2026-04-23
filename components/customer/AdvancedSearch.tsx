@@ -86,8 +86,7 @@ export default function AdvancedSearch() {
                     >
                       {search}
                     </button>
-                  )
-                })}
+                  ))}
                 </div>
               </div>
             )}
@@ -127,7 +126,8 @@ export default function AdvancedSearch() {
                       <p className="text-xs font-bold text-primary mt-1">₺{book.price.toFixed(2)}</p>
                     </div>
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

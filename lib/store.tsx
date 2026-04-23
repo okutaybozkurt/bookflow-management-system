@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import {
   DataMode,
   Book,
@@ -90,6 +90,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
   const [customerView, setCustomerView] = useState<CustomerView>('home')
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
+  const [dynamicBooks, setDynamicBooks] = useState<Book[]>([])
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await fetch('/api/books')
+        if (res.ok) {
+          const data = await res.json()
+          setDynamicBooks(data)
+        }
+      } catch (error) {
+        console.error('Fetch error:', error)
+      }
+    }
+    fetchBooks()
+  }, [])
 
   const login = (role: UserRole, email: string, name?: string) => {
     setUserRole(role)
@@ -165,7 +181,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         logout,
         dataMode,
         setDataMode,
-        books: allBooks,
+        books: dynamicBooks.length > 0 ? dynamicBooks : allBooks,
         monthlyRevenue: isGolden ? goldenMonthlyRevenue : junkMonthlyRevenue,
         yearlyRevenue: isGolden ? goldenYearlyRevenue : junkYearlyRevenue,
         metrics: isGolden ? goldenMetrics : junkMetrics,
