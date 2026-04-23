@@ -8,85 +8,101 @@ import { useState } from 'react'
 import AdvancedSearch from './AdvancedSearch'
 
 export default function CustomerHeader() {
-  const { userRole, logout, cartCount, favoriteIds, userName, setCustomerView } = useApp()
+  const { userRole, logout, cart, favoriteIds, userName, setCustomerView, setIsAdminView } = useApp()
   const [authModalOpen, setAuthModalOpen] = useState(false)
 
   const isLoggedIn = userRole === 'customer' || userRole === 'admin'
+  const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0)
 
   return (
-    <>
-      <header className="bg-white border-b border-border sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-4">
-            {/* Logo */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-foreground tracking-tight">
-                Kitap<span className="text-primary">Üssü</span>
-              </span>
-            </div>
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-white/80 backdrop-blur-md">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        {/* Logo */}
+        <button onClick={() => setCustomerView('home')} className="flex items-center gap-2 group shrink-0">
+          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+            <BookOpen className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-foreground">
+            Kitap<span className="text-primary">Üssü</span>
+          </span>
+        </button>
 
-            {/* Search Bar */}
-            <AdvancedSearch />
+        {/* Search */}
+        <div className="flex-1 max-w-xl hidden md:block">
+          <AdvancedSearch />
+        </div>
 
-            {/* Right: Auth / Actions */}
-            <div className="flex items-center gap-2 shrink-0">
-              {!isLoggedIn ? (
-                <Button
-                  onClick={() => setAuthModalOpen(true)}
-                  className="bg-primary hover:bg-primary/90 text-white text-sm font-medium px-5 py-2 rounded-md"
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {!isLoggedIn ? (
+            <Button onClick={() => setAuthModalOpen(true)} className="rounded-xl px-6 font-bold shadow-lg shadow-primary/20">
+              Giriş Yap
+            </Button>
+          ) : (
+            <div className="flex items-center gap-1">
+              {/* Admin Panel Button (Only for Admins) */}
+              {userRole === 'admin' && (
+                <button
+                  onClick={() => setIsAdminView(true)}
+                  className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors group"
                 >
-                  Giriş Yap
-                </Button>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <button className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors group">
-                    <User className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
-                    <span className="text-[10px] text-muted-foreground group-hover:text-primary line-clamp-1">
-                      {userName}
-                    </span>
-                  </button>
-                  <button
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <span className="text-[10px] font-bold">ADM</span>
+                  </div>
+                  <span className="text-[10px] font-bold">Admin Panel</span>
+                </button>
+              )}
+
+              {/* Profile */}
+              <button className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors group">
+                <User className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
+                <span className="text-[10px] text-muted-foreground group-hover:text-primary line-clamp-1">{userName}</span>
+              </button>
+
+              {/* Customer Features (Hidden if Admin) */}
+              {userRole !== 'admin' && (
+                <>
+                  <button 
                     onClick={() => setCustomerView('favorites')}
-                    className="relative flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors group"
+                    className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors relative group"
                   >
                     <Heart className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                     {favoriteIds.size > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute top-1 right-3 w-3.5 h-3.5 bg-primary text-white text-[8px] font-bold rounded-full flex items-center justify-center">
                         {favoriteIds.size}
                       </span>
                     )}
                     <span className="text-[10px] text-muted-foreground group-hover:text-primary">Favoriler</span>
                   </button>
-                  <button
+
+                  <button 
                     onClick={() => setCustomerView('cart')}
-                    className="relative flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors group"
+                    className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors relative group"
                   >
                     <ShoppingCart className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                     {cartCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute top-1 right-3 w-3.5 h-3.5 bg-primary text-white text-[8px] font-bold rounded-full flex items-center justify-center">
                         {cartCount}
                       </span>
                     )}
                     <span className="text-[10px] text-muted-foreground group-hover:text-primary">Sepetim</span>
                   </button>
-                  <button
+
+                  <button 
                     onClick={logout}
-                    className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors group"
+                    className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-red-50 transition-colors group"
                   >
-                    <LogOut className="w-5 h-5 text-muted-foreground group-hover:text-destructive" />
-                    <span className="text-[10px] text-muted-foreground group-hover:text-destructive">Çıkış</span>
+                    <LogOut className="w-5 h-5 text-muted-foreground group-hover:text-red-500" />
+                    <span className="text-[10px] text-muted-foreground group-hover:text-red-500">Çıkış</span>
                   </button>
-                </div>
+                </>
               )}
             </div>
-          </div>
+          )}
         </div>
-      </header>
+      </div>
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
-    </>
+    </header>
   )
 }

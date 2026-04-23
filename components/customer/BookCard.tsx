@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
 import { useApp } from '@/lib/store'
-import { Book } from '@/lib/data'
 import { cn } from '@/lib/utils'
 
 interface BookCardProps {
-  book: Book
+  book: any
 }
 
 export default function BookCard({ book }: BookCardProps) {

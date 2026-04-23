@@ -16,6 +16,7 @@ export default function BooksGrid() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
       <CategoryBar activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+      
       {/* Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-foreground text-white p-8 mb-8">
         <div className="relative z-10">
@@ -64,8 +65,8 @@ export default function BooksGrid() {
         <button className="text-sm text-primary font-medium hover:underline">Tümünü gör →</button>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {[...books].reverse().map((book) => (
-          <BookCard key={'new-' + book.id} book={{ ...book, id: 'new-' + book.id }} />
+        {books.slice(0, 6).map((book) => (
+          <BookCard key={'new-' + book.id} book={book} />
         ))}
       </div>
     </section>

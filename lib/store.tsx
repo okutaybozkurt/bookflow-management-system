@@ -1,38 +1,34 @@
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
-import {
-  DataMode,
-  Book,
-  RevenueEntry,
-  YearlyEntry,
-  goldenBooks,
-  goldenMonthlyRevenue,
-  goldenYearlyRevenue,
-  goldenMetrics,
-  junkBooks,
-  junkMonthlyRevenue,
-  junkYearlyRevenue,
-  junkMetrics,
-} from './data'
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 
 export type UserRole = 'guest' | 'customer' | 'admin'
+export type CustomerView = 'home' | 'categories' | 'cart' | 'favorites' | 'profile' | 'book-detail'
+export type AdminPage = 'dashboard' | 'inventory' | 'orders' | 'customers' | 'reports' | 'income-expense' | 'settings'
 
-export interface Toast {
+interface Book {
   id: string
-  message: string
-  type: 'success' | 'error' | 'info'
-  duration?: number
+  title: string
+  author: string
+  price: number
+  stock: number
+  sold: number
+  cover: string
+  category: string
+  description: string
+  isbn?: string
 }
 
-export type CustomerView = 'home' | 'cart' | 'favorites' | 'book-detail'
+interface Category {
+  id: string
+  name: string
+}
 
-export interface CartItem {
-  book: Book
+interface CartItem extends Book {
   quantity: number
 }
 
-interface AppState {
+interface AppContextType {
   // Auth
   userRole: UserRole
   userEmail: string
@@ -40,112 +36,147 @@ interface AppState {
   login: (role: UserRole, email: string, name?: string) => void
   logout: () => void
 
-  // Data Mode
-  dataMode: DataMode
-  setDataMode: (mode: DataMode) => void
-
-  // Derived data
-  books: Book[]
-  monthlyRevenue: RevenueEntry[]
-  yearlyRevenue: YearlyEntry[]
-  metrics: { toplamKitap: number; toplamGelir: number; toplamStok: number }
-
-  // Customer navigation
+  // Navigation
   customerView: CustomerView
   setCustomerView: (view: CustomerView) => void
-  selectedBook: Book | null
-  openBook: (book: Book) => void
+  adminPage: AdminPage
+  setAdminPage: (page: AdminPage) => void
+  isAdminView: boolean
+  setIsAdminView: (v: boolean) => void
 
-  // Cart
-  cartItems: CartItem[]
-  cartCount: number
+  // Data
+  books: Book[]
+  categories: Category[]
+  metrics: {
+    toplamKitap: number
+    toplamGelir: number
+    toplamStok: number
+  }
+  monthlyRevenue: any[]
+  yearlyRevenue: any[]
+  cart: CartItem[]
+  favoriteIds: Set<string>
   addToCart: (book: Book) => void
   removeFromCart: (bookId: string) => void
-  updateCartQty: (bookId: string, qty: number) => void
-
-  // Favorites
-  favoriteIds: Set<string>
+  updateCartQuantity: (bookId: string, quantity: number) => void
   toggleFavorite: (bookId: string) => void
+  openBook: (book: Book) => void
+  selectedBook: Book | null
 
-  // Admin view
-  adminPage: string
-  setAdminPage: (page: string) => void
-
-  // Toast notifications
-  toasts: Toast[]
+  // UI
   addToast: (message: string, type: 'success' | 'error' | 'info') => void
-  removeToast: (id: string) => void
+  toasts: { id: string; message: string; type: 'success' | 'error' | 'info' }[]
 }
 
-const AppContext = createContext<AppState | null>(null)
+const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>('guest')
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
-  const [dataMode, setDataMode] = useState<DataMode>('golden')
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set(['2', '6']))
-  const [adminPage, setAdminPage] = useState('dashboard')
-  const [toasts, setToasts] = useState<Toast[]>([])
+  const [isAdminView, setIsAdminView] = useState(false)
+
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
+  const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([])
   const [customerView, setCustomerView] = useState<CustomerView>('home')
+  const [adminPage, setAdminPage] = useState<AdminPage>('dashboard')
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
-  const [dynamicBooks, setDynamicBooks] = useState<Book[]>([])
+  const [books, setBooks] = useState<Book[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+
+  const metrics = {
+    toplamKitap: books.length,
+    toplamGelir: books.reduce((acc, b) => acc + (b.price * b.sold), 0),
+    toplamStok: books.reduce((acc, b) => acc + b.stock, 0),
+  }
+
+  const monthlyRevenue = [
+    { month: 'Oca', gelir: 4500, gider: 2100 },
+    { month: 'Şub', gelir: 5200, gider: 2800 },
+    { month: 'Mar', gelir: 4800, gider: 2400 },
+    { month: 'Nis', gelir: 6100, gider: 3100 },
+  ]
+  const yearlyRevenue = [
+    { year: '2023', gelir: 45000, gider: 22000 },
+    { year: '2024', gelir: 52000, gider: 28000 },
+  ]
 
   useEffect(() => {
-    const fetchBooks = async () => {
+    const savedRole = localStorage.getItem('userRole') as UserRole
+    const savedEmail = localStorage.getItem('userEmail')
+    const savedName = localStorage.getItem('userName')
+    const savedIsAdminView = localStorage.getItem('isAdminView') === 'true'
+
+    if (savedRole) setUserRole(savedRole)
+    if (savedEmail) setUserEmail(savedEmail)
+    if (savedName) setUserName(savedName)
+    if (savedRole === 'admin') setIsAdminView(savedIsAdminView)
+
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/books')
-        if (res.ok) {
-          const data = await res.json()
-          setDynamicBooks(data)
-        }
+        const [booksRes, catsRes] = await Promise.all([
+          fetch('/api/books'),
+          fetch('/api/categories')
+        ])
+        if (booksRes.ok) setBooks(await booksRes.json())
+        if (catsRes.ok) setCategories(await catsRes.json())
       } catch (error) {
         console.error('Fetch error:', error)
       }
     }
-    fetchBooks()
+    fetchData()
   }, [])
+
+  useEffect(() => {
+    if (userRole !== 'guest') {
+      localStorage.setItem('userRole', userRole)
+      localStorage.setItem('userEmail', userEmail)
+      localStorage.setItem('userName', userName)
+      localStorage.setItem('isAdminView', isAdminView.toString())
+    } else {
+      localStorage.removeItem('userRole')
+      localStorage.removeItem('userEmail')
+      localStorage.removeItem('userName')
+      localStorage.removeItem('isAdminView')
+    }
+  }, [userRole, userEmail, userName, isAdminView])
 
   const login = (role: UserRole, email: string, name?: string) => {
     setUserRole(role)
     setUserEmail(email)
     setUserName(name || email.split('@')[0])
+    if (role === 'admin') setIsAdminView(true)
   }
 
   const logout = () => {
     setUserRole('guest')
     setUserEmail('')
     setUserName('')
+    setIsAdminView(false)
     setAdminPage('dashboard')
-    setCustomerView('home')
-  }
-
-  const openBook = (book: Book) => {
-    setSelectedBook(book)
-    setCustomerView('book-detail')
   }
 
   const addToCart = (book: Book) => {
-    setCartItems((prev) => {
-      const existing = prev.find((i) => i.book.id === book.id)
+    setCart((prev) => {
+      const existing = prev.find((item) => item.id === book.id)
       if (existing) {
-        return prev.map((i) => i.book.id === book.id ? { ...i, quantity: i.quantity + 1 } : i)
+        return prev.map((item) => item.id === book.id ? { ...item, quantity: item.quantity + 1 } : item)
       }
-      return [...prev, { book, quantity: 1 }]
+      return [...prev, { ...book, quantity: 1 }]
     })
   }
 
   const removeFromCart = (bookId: string) => {
-    setCartItems((prev) => prev.filter((i) => i.book.id !== bookId))
+    setCart((prev) => prev.filter((item) => item.id !== bookId))
   }
 
-  const updateCartQty = (bookId: string, qty: number) => {
-    if (qty <= 0) {
+  const updateCartQuantity = (bookId: string, quantity: number) => {
+    if (quantity <= 0) {
       removeFromCart(bookId)
       return
     }
-    setCartItems((prev) => prev.map((i) => i.book.id === bookId ? { ...i, quantity: qty } : i))
+    setCart((prev) => prev.map((item) => item.id === bookId ? { ...item, quantity } : item))
   }
 
   const toggleFavorite = (bookId: string) => {
@@ -157,59 +188,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const openBook = (book: Book) => {
+    setSelectedBook(book)
+    setCustomerView('book-detail')
+  }
+
   const addToast = (message: string, type: 'success' | 'error' | 'info') => {
     const id = Math.random().toString(36).substr(2, 9)
-    setToasts((prev) => [...prev, { id, message, type, duration: 3000 }])
-    setTimeout(() => removeToast(id), 3000)
+    setToasts((prev) => [...prev, { id, message, type }])
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id))
+    }, 3000)
   }
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
-  }
-
-  const isGolden = dataMode === 'golden'
-  const allBooks = isGolden ? goldenBooks : junkBooks
-  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0)
 
   return (
     <AppContext.Provider
       value={{
-        userRole,
-        userEmail,
-        userName,
-        login,
-        logout,
-        dataMode,
-        setDataMode,
-        books: dynamicBooks.length > 0 ? dynamicBooks : allBooks,
-        monthlyRevenue: isGolden ? goldenMonthlyRevenue : junkMonthlyRevenue,
-        yearlyRevenue: isGolden ? goldenYearlyRevenue : junkYearlyRevenue,
-        metrics: isGolden ? goldenMetrics : junkMetrics,
-        customerView,
-        setCustomerView,
-        selectedBook,
-        openBook,
-        cartItems,
-        cartCount,
-        addToCart,
-        removeFromCart,
-        updateCartQty,
-        favoriteIds,
-        toggleFavorite,
-        adminPage,
-        setAdminPage,
-        toasts,
-        addToast,
-        removeToast,
+        userRole, userEmail, userName, login, logout,
+        customerView, setCustomerView, adminPage, setAdminPage,
+        isAdminView, setIsAdminView,
+        books, categories, metrics, monthlyRevenue, yearlyRevenue,
+        cart, favoriteIds, addToCart, removeFromCart, updateCartQuantity, toggleFavorite,
+        openBook, selectedBook,
+        addToast, toasts
       }}
     >
       {children}
+      <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2">
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            className={`px-4 py-2 rounded-lg shadow-lg text-white text-sm font-medium animate-in slide-in-from-right-full ${t.type === 'success' ? 'bg-green-500' : t.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+              }`}
+          >
+            {t.message}
+          </div>
+        ))}
+      </div>
     </AppContext.Provider>
   )
 }
 
-export function useApp() {
-  const ctx = useContext(AppContext)
-  if (!ctx) throw new Error('useApp must be used within AppProvider')
-  return ctx
+export const useApp = () => {
+  const context = useContext(AppContext)
+  if (!context) throw new Error('useApp must be used within AppProvider')
+  return context
 }

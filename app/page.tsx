@@ -8,9 +8,9 @@ import ToastContainer from '@/components/ToastContainer'
 import AdminResetHandler from '@/components/AdminResetHandler'
 
 function AppRouter() {
-  const { userRole } = useApp()
+  const { userRole, isAdminView } = useApp()
 
-  if (userRole === 'admin') {
+  if (userRole === 'admin' && isAdminView) {
     return <AdminLayout />
   }
 

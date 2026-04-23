@@ -58,6 +58,25 @@ export default function AdminSidebar() {
         })}
       </nav>
 
+      {/* Presentation Modes (Hidden-ish helper) */}
+      <div className="px-3 py-4 space-y-2 border-t border-sidebar-border bg-black/20">
+        <p className="text-[9px] font-bold text-sidebar-foreground/30 uppercase tracking-widest px-3 mb-2">Sunum Kontrolü</p>
+        <button
+          onClick={() => { if(confirm('Demo (Kirli) moda geçilsin mi?')) fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'junk' })}).then(() => window.location.reload()) }}
+          className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-bold text-red-400/70 hover:bg-red-500/10 hover:text-red-400 transition-all border border-red-500/20"
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          DEMO MODU (KIRLI)
+        </button>
+        <button
+          onClick={() => { if(confirm('Sunum (Altın) moduna geçilsin mi?')) fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'golden' })}).then(() => window.location.reload()) }}
+          className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-bold text-primary/70 hover:bg-primary/10 hover:text-primary transition-all border border-primary/20"
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+          SUNUM MODU (ALTIN)
+        </button>
+      </div>
+
       {/* Logout */}
       <div className="p-3 border-t border-sidebar-border">
         <button
