@@ -44,10 +44,9 @@ export default function BooksGrid() {
         <button className="text-sm text-primary font-medium hover:underline">Tümünü gör →</button>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {filteredBooks.map((book) => (
-          <BookCard key={book.id} book={book} />
+        {filteredBooks.map((book, idx) => (
+          <BookCard key={book.id} book={book} priority={idx < 2} />
         ))}
       </div>
       {filteredBooks.length === 0 && (

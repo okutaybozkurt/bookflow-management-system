@@ -29,9 +29,9 @@ export default function AdminSidebar() {
         </div>
         <div>
           <span className="text-base font-bold text-white">
-            Book<span className="text-primary">Flow</span>
+            Kitap<span className="text-primary">Üssü</span>
           </span>
-          <p className="text-[10px] text-sidebar-foreground/50 leading-none mt-0.5">Admin Panel</p>
+          <p className="text-[10px] text-sidebar-foreground/50 leading-none mt-0.5">Yönetim Paneli</p>
         </div>
       </div>
 
@@ -43,7 +43,7 @@ export default function AdminSidebar() {
           return (
             <button
               key={item.id}
-              onClick={() => setAdminPage(item.id)}
+              onClick={() => setAdminPage(item.id as any)}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left',
                 isActive

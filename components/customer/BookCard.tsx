@@ -8,9 +8,10 @@ import { cn } from '@/lib/utils'
 
 interface BookCardProps {
   book: any
+  priority?: boolean
 }
 
-export default function BookCard({ book }: BookCardProps) {
+export default function BookCard({ book, priority }: BookCardProps) {
   const { userRole, addToCart, favoriteIds, toggleFavorite, openBook, addToast } = useApp()
   const [added, setAdded] = useState(false)
   const [clientData, setClientData] = useState<{ rating: number; reviewCount: number } | null>(null)
@@ -52,6 +53,7 @@ export default function BookCard({ book }: BookCardProps) {
           src={book.cover}
           alt={book.title}
           fill
+          priority={priority}
           className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
         />

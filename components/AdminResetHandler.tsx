@@ -13,14 +13,15 @@ export default function AdminResetHandler() {
 
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent) => {
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
-      const cmdKey = isMac ? e.metaKey : e.ctrlKey
+      // Command (Mac) or Ctrl (Windows/Linux)
+      const isCmd = e.metaKey || e.ctrlKey
+      const isShift = e.shiftKey
 
-      if (cmdKey && e.shiftKey) {
+      if (isCmd && isShift) {
         let mode: 'golden' | 'junk' | null = null
 
-        if (e.key.toUpperCase() === 'P') mode = 'golden' // Presentation (Altın)
-        if (e.key.toUpperCase() === 'D') mode = 'junk'   // Demo (Kirli)
+        if (e.code === 'KeyP') mode = 'golden' // Presentation (Altın)
+        if (e.code === 'KeyD') mode = 'junk'   // Demo (Kirli)
 
         if (mode) {
           e.preventDefault()

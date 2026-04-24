@@ -4,7 +4,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 
 export type UserRole = 'guest' | 'customer' | 'admin'
 export type CustomerView = 'home' | 'categories' | 'cart' | 'favorites' | 'profile' | 'book-detail'
-export type AdminPage = 'dashboard' | 'inventory' | 'orders' | 'customers' | 'reports' | 'income-expense' | 'settings'
+export type AdminPage = 'dashboard' | 'kitap-yonetimi' | 'kullanici-yonetimi' | 'siparisler' | 'raporlar' | 'gelir-gider' | 'ayarlar'
 
 interface Book {
   id: string
@@ -17,6 +17,9 @@ interface Book {
   category: string
   description: string
   isbn?: string
+  pages?: number
+  language?: string
+  publishDate?: string
 }
 
 interface Category {
@@ -26,6 +29,15 @@ interface Category {
 
 interface CartItem extends Book {
   quantity: number
+}
+
+interface Order {
+  id: string
+  date: string
+  total: number
+  items: CartItem[]
+  status: 'pending' | 'shipped' | 'delivered' | 'cancelled'
+  customerName: string
 }
 
 interface AppContextType {
@@ -54,18 +66,24 @@ interface AppContextType {
   }
   monthlyRevenue: any[]
   yearlyRevenue: any[]
-  cart: CartItem[]
+  cartItems: CartItem[]
   favoriteIds: Set<string>
   addToCart: (book: Book) => void
   removeFromCart: (bookId: string) => void
-  updateCartQuantity: (bookId: string, quantity: number) => void
+  updateCartQty: (bookId: string, quantity: number) => void
   toggleFavorite: (bookId: string) => void
+  removeToast: (id: string) => void
   openBook: (book: Book) => void
   selectedBook: Book | null
+
+  orders: Order[]
+  createOrder: () => void
 
   // UI
   addToast: (message: string, type: 'success' | 'error' | 'info') => void
   toasts: { id: string; message: string; type: 'success' | 'error' | 'info' }[]
+  isAuthModalOpen: boolean
+  setAuthModalOpen: (open: boolean) => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -76,7 +94,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [userName, setUserName] = useState('')
   const [isAdminView, setIsAdminView] = useState(false)
 
-  const [cart, setCart] = useState<CartItem[]>([])
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([])
   const [customerView, setCustomerView] = useState<CustomerView>('home')
@@ -84,6 +102,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [books, setBooks] = useState<Book[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [isAuthModalOpen, setAuthModalOpen] = useState(false)
 
   const metrics = {
     toplamKitap: books.length,
@@ -155,10 +175,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUserName('')
     setIsAdminView(false)
     setAdminPage('dashboard')
+    setCustomerView('home')
+  }
+
+  const createOrder = () => {
+    if (cartItems.length === 0) return
+
+    const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+    const shipping = subtotal > 500 ? 0 : 29.90
+    const total = subtotal + shipping
+
+    const newOrder: Order = {
+      id: `#BF-${Math.floor(10000 + Math.random() * 90000)}`,
+      date: new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' }),
+      total,
+      items: [...cartItems],
+      status: 'pending',
+      customerName: userName || userEmail.split('@')[0] || 'Misafir Müşteri'
+    }
+
+    // Update stock and orders
+    setBooks(prev => prev.map(book => {
+      const cartItem = cartItems.find(item => item.id === book.id)
+      if (cartItem) {
+        return { ...book, stock: book.stock - cartItem.quantity, sold: book.sold + cartItem.quantity }
+      }
+      return book
+    }))
+
+    setOrders(prev => [newOrder, ...prev])
+    setCartItems([])
+    addToast('Siparişiniz başarıyla oluşturuldu! 🎉', 'success')
+    setCustomerView('profile')
+  }
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id))
   }
 
   const addToCart = (book: Book) => {
-    setCart((prev) => {
+    setCartItems((prev) => {
       const existing = prev.find((item) => item.id === book.id)
       if (existing) {
         return prev.map((item) => item.id === book.id ? { ...item, quantity: item.quantity + 1 } : item)
@@ -168,15 +224,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const removeFromCart = (bookId: string) => {
-    setCart((prev) => prev.filter((item) => item.id !== bookId))
+    setCartItems((prev) => prev.filter((item) => item.id !== bookId))
   }
 
-  const updateCartQuantity = (bookId: string, quantity: number) => {
+  const updateCartQty = (bookId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(bookId)
       return
     }
-    setCart((prev) => prev.map((item) => item.id === bookId ? { ...item, quantity } : item))
+    setCartItems((prev) => prev.map((item) => item.id === bookId ? { ...item, quantity } : item))
   }
 
   const toggleFavorite = (bookId: string) => {
@@ -208,9 +264,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         customerView, setCustomerView, adminPage, setAdminPage,
         isAdminView, setIsAdminView,
         books, categories, metrics, monthlyRevenue, yearlyRevenue,
-        cart, favoriteIds, addToCart, removeFromCart, updateCartQuantity, toggleFavorite,
+        cartItems, favoriteIds, addToCart, removeFromCart, updateCartQty, toggleFavorite,
+        removeToast, orders, createOrder,
         openBook, selectedBook,
-        addToast, toasts
+        addToast, toasts,
+        isAuthModalOpen, setAuthModalOpen
       }}
     >
       {children}

@@ -101,18 +101,24 @@ export default function BookDetailPage() {
 
           {/* Book details grid */}
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <BookOpen className="w-4 h-4 shrink-0" />
-              <span>{book.pages} sayfa</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Globe className="w-4 h-4 shrink-0" />
-              <span>{book.language}</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="w-4 h-4 shrink-0" />
-              <span>{new Date(book.publishDate).toLocaleDateString('tr-TR')}</span>
-            </div>
+            {book.pages && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <BookOpen className="w-4 h-4 shrink-0" />
+                <span>{book.pages} sayfa</span>
+              </div>
+            )}
+            {book.language && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Globe className="w-4 h-4 shrink-0" />
+                <span>{book.language}</span>
+              </div>
+            )}
+            {book.publishDate && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="w-4 h-4 shrink-0" />
+                <span>{new Date(book.publishDate).toLocaleDateString('tr-TR')}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2 text-muted-foreground">
               <Hash className="w-4 h-4 shrink-0" />
               <span className="text-xs">{book.isbn}</span>

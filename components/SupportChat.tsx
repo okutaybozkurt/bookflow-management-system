@@ -13,18 +13,15 @@ const initialMessages: Message[] = [
   {
     id: '1',
     from: 'bot',
-    text: 'Selam! Kitap arayışında veya siparişinde yardıma mı ihtiyacın var? Ben buradayım!',
+    text: 'Merhaba! KitapÜssü Canlı Destek merkezine hoş geldiniz. Size nasıl yardımcı olabilirim?',
   },
-  {
-    id: '2',
-    from: 'user',
-    text: 'Merhaba, kargo takibi hakkında bilgi alabilir miyim?',
-  },
-  {
-    id: '3',
-    from: 'bot',
-    text: 'Tabii ki! Sipariş numaranızı paylaşırsanız kargo durumunuzu hemen kontrol edebilirim. 📦',
-  },
+]
+
+const quickQuestions = [
+  'Kargom nerede?',
+  'İade nasıl yapılır?',
+  'Kitap değişimi yapabilir miyim?',
+  'Ödeme seçenekleri nelerdir?',
 ]
 
 export default function SupportChat() {
@@ -39,6 +36,32 @@ export default function SupportChat() {
     }
   }, [isOpen, messages])
 
+  const handleQuickQuestion = (question: string) => {
+    const userMsg: Message = { id: Date.now().toString(), from: 'user', text: question }
+    setMessages((prev) => [...prev, userMsg])
+    
+    setTimeout(() => {
+      let botResponse = 'Mesajınız alındı! En kısa sürede size dönüş yapacağız. Başka bir konuda yardımcı olabilir miyim?'
+      
+      if (question.includes('Kargo')) {
+        botResponse = 'Sipariş numaranızı paylaşırsanız kargo durumunuzu hemen kontrol edebilirim. 📦'
+      } else if (question.includes('İade')) {
+        botResponse = 'İade işlemlerini profilinizdeki "Siparişlerim" sayfasından başlatabilirsiniz. 14 gün içinde ücretsiz iade hakkınız mevcuttur.'
+      } else if (question.includes('değişimi')) {
+        botResponse = 'Kitap değişimi için ürünün hasarsız olması gerekmektedir. Değişim talebinizi destek@kitapussu.com adresine iletebilirsiniz.'
+      } else if (question.includes('Ödeme')) {
+        botResponse = 'Tüm kredi kartları, banka kartları ve kapıda ödeme seçeneği ile güvenle alışveriş yapabilirsiniz. 💳'
+      }
+      
+      const botMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        from: 'bot',
+        text: botResponse,
+      }
+      setMessages((prev) => [...prev, botMsg])
+    }, 800)
+  }
+
   const sendMessage = () => {
     if (!input.trim()) return
     const userMsg: Message = { id: Date.now().toString(), from: 'user', text: input.trim() }
@@ -48,7 +71,7 @@ export default function SupportChat() {
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         from: 'bot',
-        text: 'Mesajınız alındı! En kısa sürede size dönüş yapacağız. Başka bir konuda yardımcı olabilir miyim?',
+        text: 'Mesajınız alındı! En kısa sürede uzman bir temsilcimiz size dönüş yapacaktır. Başka bir konuda yardımcı olabilir miyim?',
       }
       setMessages((prev) => [...prev, botMsg])
     }, 900)
@@ -68,8 +91,8 @@ export default function SupportChat() {
                 <MessageCircle className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-white text-sm font-bold leading-none">BookFlow Canlı Destek</p>
-                <p className="text-white/70 text-[11px] mt-0.5">Genellikle birkaç dakika içinde yanıt verir</p>
+                <p className="text-white text-sm font-bold leading-none">KitapÜssü Canlı Destek</p>
+                <p className="text-white/70 text-[11px] mt-0.5">Size nasıl yardımcı olabilirim?</p>
               </div>
             </div>
             <button
@@ -109,6 +132,21 @@ export default function SupportChat() {
               </div>
             ))}
             <div ref={bottomRef} />
+
+            {/* Quick Questions UI */}
+            {messages.length === 1 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {quickQuestions.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => handleQuickQuestion(q)}
+                    className="text-[10px] bg-white border border-primary/30 text-primary hover:bg-primary/5 px-2.5 py-1.5 rounded-full transition-colors font-medium"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Input */}

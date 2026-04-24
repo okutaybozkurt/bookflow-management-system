@@ -1,18 +1,16 @@
 'use client'
 
+import { useApp } from '@/lib/store'
 import { Package, Truck, CheckCircle, XCircle } from 'lucide-react'
 
-const orders = [
-  { id: '#BF-10421', customer: 'Ahmet Yıldız', date: '23 Nis 2026', amount: 449.80, status: 'delivered', items: 3 },
-  { id: '#BF-10420', customer: 'Fatma Kaya', date: '22 Nis 2026', amount: 189.90, status: 'shipped', items: 1 },
-  { id: '#BF-10419', customer: 'Mehmet Demir', date: '22 Nis 2026', amount: 714.40, status: 'pending', items: 4 },
-  { id: '#BF-10418', customer: 'Ayşe Çelik', date: '21 Nis 2026', amount: 215.00, status: 'delivered', items: 1 },
-  { id: '#BF-10417', customer: 'Mustafa Şahin', date: '21 Nis 2026', amount: 129.90, status: 'cancelled', items: 1 },
-  { id: '#BF-10416', customer: 'Zeynep Arslan', date: '20 Nis 2026', amount: 596.90, status: 'delivered', items: 3 },
-  { id: '#BF-10415', customer: 'İbrahim Koç', date: '20 Nis 2026', amount: 249.50, status: 'shipped', items: 2 },
+const dummyOrders = [
+  { id: '#BF-10421', customerName: 'Ahmet Yıldız', date: '23 Nis 2026', total: 449.80, status: 'delivered', items: 3 },
+  { id: '#BF-10420', customerName: 'Fatma Kaya', date: '22 Nis 2026', total: 189.90, status: 'shipped', items: 1 },
+  { id: '#BF-10419', customerName: 'Mehmet Demir', date: '22 Nis 2026', total: 714.40, status: 'pending', items: 4 },
+  { id: '#BF-10418', customerName: 'Ayşe Çelik', date: '21 Nis 2026', total: 215.00, status: 'delivered', items: 1 },
 ]
 
-const statusConfig: Record<string, { label: string; icon: typeof Package; color: string }> = {
+const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
   pending: { label: 'Beklemede', icon: Package, color: 'text-amber-600 bg-amber-50' },
   shipped: { label: 'Kargoda', icon: Truck, color: 'text-blue-600 bg-blue-50' },
   delivered: { label: 'Teslim Edildi', icon: CheckCircle, color: 'text-green-600 bg-green-50' },
@@ -20,11 +18,15 @@ const statusConfig: Record<string, { label: string; icon: typeof Package; color:
 }
 
 export default function AdminOrders() {
+  const { orders: realOrders } = useApp()
+  
+  const allOrders = [...realOrders, ...dummyOrders]
+
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-xl font-bold text-foreground">Siparişler</h1>
-        <p className="text-sm text-muted-foreground">{orders.length} aktif sipariş</p>
+        <p className="text-sm text-muted-foreground">{allOrders.length} aktif sipariş</p>
       </div>
 
       <div className="bg-white rounded-xl border border-border overflow-hidden">
@@ -39,15 +41,15 @@ export default function AdminOrders() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => {
-              const sc = statusConfig[order.status]
+            {allOrders.map((order) => {
+              const sc = statusConfig[order.status] || statusConfig.pending
               const Icon = sc.icon
               return (
                 <tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                   <td className="px-4 py-3 text-sm font-semibold text-primary">{order.id}</td>
-                  <td className="px-4 py-3 text-sm text-foreground hidden sm:table-cell">{order.customer}</td>
+                  <td className="px-4 py-3 text-sm text-foreground hidden sm:table-cell">{order.customerName}</td>
                   <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">{order.date}</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-foreground text-right">₺{order.amount.toFixed(2)}</td>
+                  <td className="px-4 py-3 text-sm font-semibold text-foreground text-right">₺{order.total.toFixed(2)}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${sc.color}`}>
                       <Icon className="w-3 h-3" />
