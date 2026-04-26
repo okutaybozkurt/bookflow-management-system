@@ -131,11 +131,35 @@ export default function SupportChat() {
                 </div>
               </div>
             ))}
+            
+            {/* Contextual Actions */}
+            {messages.length > 1 && messages[messages.length - 1].from === 'bot' && (
+              <div className="flex flex-col gap-2 pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setMessages(initialMessages)}
+                    className="flex-1 text-[10px] bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 px-3 py-2 rounded-xl transition-colors font-bold"
+                  >
+                    Başka Bir Soru Sor
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMessages(initialMessages)
+                      setIsOpen(false)
+                    }}
+                    className="flex-1 text-[10px] bg-red-50 border border-red-100 text-red-500 hover:bg-red-100 px-3 py-2 rounded-xl transition-colors font-bold"
+                  >
+                    Sohbeti Bitir
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div ref={bottomRef} />
 
-            {/* Quick Questions UI */}
+            {/* Initial Quick Questions UI */}
             {messages.length === 1 && (
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="flex flex-wrap gap-2 pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {quickQuestions.map((q) => (
                   <button
                     key={q}

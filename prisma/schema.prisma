@@ -20,6 +20,7 @@ model Author {
   id        String   @id @default(uuid())
   name      String   @unique
   books     Book[]
+  isSystem  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -28,6 +29,7 @@ model Category {
   id        String   @id @default(uuid())
   name      String   @unique
   books     Book[]
+  isSystem  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -38,8 +40,10 @@ model Book {
   isbn        String?  @unique
   price       Float
   stock       Int      @default(0)
+  sold        Int      @default(0)
   coverImage  String?  @db.LongText
   description String?
+  isSystem    Boolean  @default(false)
   authorId    String
   author      Author   @relation(fields: [authorId], references: [id])
   categoryId  String

@@ -1,0 +1,44 @@
+# KİTAPÜSSÜ - KİTAP YÖNETİM VE SATIŞ SİSTEMİ
+
+Bu proje, modern bir e-ticaret kitap satış platformu ve kapsamlı bir yönetim panelini içeren tam donanımlı bir web uygulamasıdır. Proje; dinamik içerik yönetimi, kullanıcı deneyimi odaklı tasarım, canlı destek entegrasyonu ve güvenli ödeme süreçleri üzerine kurgulanmıştır.
+
+## 1. Kurulum ve Çalıştırma
+Sistemi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleyebilirsiniz. Proje, tüm gereksinimleri karşılayacak şekilde "clone-ready" (çekilmeye hazır) mimaride yapılandırılmıştır.
+
+1. **Projeyi Klonlayın:**
+   `git clone https://github.com/okutaybozkurt/bookflow-management-system.git`
+2. **Bağımlılıkları Yükleyin:**
+   Terminal üzerinden proje ana dizinine giderek `npm install` komutunu çalıştırın.
+3. **Veritabanı Yapılandırması:**
+   `.env` dosyasında yer alan `DATABASE_URL` bilgisini yerel MySQL veritabanı ayarlarınıza göre güncelleyin.
+4. **Veritabanını Hazırlayın:**
+   `npx prisma db push` komutu ile gerekli tabloları otomatik olarak oluşturun.
+5. **Uygulamayı Başlatın:**
+   `npm run dev` komutunu çalıştırarak uygulamayı ayağa kaldırın.
+6. **Erişim:**
+   Tarayıcınızdan `http://localhost:3000` adresine giderek sistemi kullanmaya başlayabilirsiniz.
+
+## 2. Teknoloji Paketi (Tech Packet)
+Proje, güncel ve performanslı bir teknoloji yığını (stack) ile geliştirilmiştir:
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS 4 (Modern CSS-first approach)
+- **Database & ORM:** MySQL, Prisma ORM
+- **State Management:** React Context API & Custom Hooks
+- **Icons:** Lucide React
+
+## 3. Proje Gereksinimleri
+Projenin teknik spesifikasyonları, fonksiyonel gereksinimleri ve geliştirme sürecine dair detaylar kök dizinde yer alan `requirements.md` ve `projectmap.md` dosyalarında detaylandırılmıştır. Bu dosyalar, projenin hangi standartlara göre inşa edildiğini göstermektedir.
+
+## 4. Temel Fonksiyonlar
+- **Kullanıcı Paneli:** Kitap listeleme, gelişmiş arama, sepet yönetimi ve profesyonel ödeme ekranı.
+- **Yönetici (Admin) Paneli:** Kitap/kategori yönetimi ve satış istatistikleri.
+- **Canlı Destek Botu:** Akıllı yönlendirmeler sunan destek modülü.
+
+## 5. Sunum İçin Özel Kısayollar
+- **Cmd/Ctrl + Shift + P (Sunum Modu):** Sistemi profesyonel "Altın Verilerle" doldurur. (Kullanıcı verileri korunur).
+- **Cmd/Ctrl + Shift + D (Demo Modu):** Sistemi test süreçlerini göstermek amacıyla "Kirli Verilerle" doldurur.
+
+---
+**GitHub Repo:** [https://github.com/okutaybozkurt/bookflow-management-system](https://github.com/okutaybozkurt/bookflow-management-system)
+**Hazırlayan:** Orhan Kutay Bozkurt
+**Teslim Tarihi:** 28.04.2026

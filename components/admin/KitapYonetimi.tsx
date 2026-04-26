@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useRef, useMemo } from 'react'
-import { Plus, Search, Edit2, Trash2, X, Loader2, Upload, Image as ImageIcon } from 'lucide-center'
-import { Plus as PlusIcon, Search as SearchIcon, Edit2 as EditIcon, Trash2 as TrashIcon, X as XIcon, Loader2 as LoaderIcon, Upload as UploadIcon, ImageIcon as ImgIcon } from 'lucide-react'
+import { Plus as PlusIcon, Search as SearchIcon, Edit2 as EditIcon, Trash2 as TrashIcon, X as XIcon, Loader2 as LoaderIcon, Upload as UploadIcon, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useApp } from '@/lib/store'
 
@@ -14,6 +13,7 @@ export default function KitapYonetimi() {
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [editingBook, setEditingBook] = useState<any>(null)
+  const [isManualCategory, setIsManualCategory] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -36,6 +36,7 @@ export default function KitapYonetimi() {
 
   const handleEdit = (book: any) => {
     setEditingBook(book)
+    setIsManualCategory(false)
     setForm({
       title: book.title,
       author: book.author,
@@ -124,9 +125,11 @@ export default function KitapYonetimi() {
             if (tab !== 'list') {
               setTab('list')
               setEditingBook(null)
+              setIsManualCategory(false)
             } else {
               setTab('add')
               setForm({ title: '', author: '', price: '', stock: '', isbn: '', category: '', cover: '', description: '' })
+              setIsManualCategory(false)
             }
           }}
           className={`flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${tab === 'list' ? 'bg-primary' : 'bg-destructive'}`}
@@ -228,8 +231,16 @@ export default function KitapYonetimi() {
                 
                 <select 
                   className="w-full px-4 py-3 border border-border rounded-xl outline-none focus:border-primary bg-white appearance-none cursor-pointer"
-                  value={form.category}
-                  onChange={e => setForm({...form, category: e.target.value})}
+                  value={isManualCategory ? "Yeni Kategori" : form.category}
+                  onChange={e => {
+                    if (e.target.value === "Yeni Kategori") {
+                      setIsManualCategory(true)
+                      setForm({...form, category: ''})
+                    } else {
+                      setIsManualCategory(false)
+                      setForm({...form, category: e.target.value})
+                    }
+                  }}
                 >
                   <option value="" disabled>Kategori Seçin *</option>
                   {categories.map(cat => (
@@ -239,10 +250,11 @@ export default function KitapYonetimi() {
                 </select>
               </div>
 
-              {form.category === 'Yeni Kategori' && (
+              {isManualCategory && (
                 <input 
                   placeholder="Yeni Kategori Adı *" 
                   className="w-full px-4 py-3 border border-border rounded-xl outline-none focus:border-primary animate-in fade-in slide-in-from-top-1 bg-primary/5 font-bold" 
+                  value={form.category}
                   onChange={e => setForm({...form, category: e.target.value})} 
                 />
               )}

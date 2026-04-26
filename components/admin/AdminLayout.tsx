@@ -9,7 +9,6 @@ import AdminOrders from './AdminOrders'
 import AdminRaporlar from './AdminRaporlar'
 import AdminGelirGider from './AdminGelirGider'
 import AdminSettings from './AdminSettings'
-import SupportChat from '@/components/SupportChat'
 import { useApp } from '@/lib/store'
 
 export default function AdminLayout() {
@@ -37,7 +36,6 @@ export default function AdminLayout() {
           {renderPage()}
         </main>
       </div>
-      <SupportChat />
     </div>
   )
 }

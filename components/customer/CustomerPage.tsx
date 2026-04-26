@@ -6,7 +6,6 @@ import CartPage from './CartPage'
 import FavoritesPage from './FavoritesPage'
 import BookDetailPage from './BookDetailPage'
 import ProfilePage from './ProfilePage'
-import SupportChat from '@/components/SupportChat'
 import Footer from '@/components/Footer'
 import AuthModal from '@/components/AuthModal'
 import { useApp } from '@/lib/store'
@@ -30,7 +29,6 @@ export default function CustomerPage() {
       <main className="flex-1">
         {renderView()}
       </main>
-      <SupportChat />
       <Footer />
       
       {/* Root level Auth Modal to prevent z-index issues */}
