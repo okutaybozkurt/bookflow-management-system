@@ -195,7 +195,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUserRole(role)
     setUserEmail(email)
     setUserName(name || email.split('@')[0])
-    if (role === 'admin') setIsAdminView(true)
+    if (role === 'admin') {
+      setIsAdminView(true)
+    } else if (cartItems.length > 0) {
+      setCustomerView('cart')
+    }
   }
 
   const logout = () => {
@@ -208,6 +212,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const createOrder = () => {
+    if (userRole === 'guest') {
+      addToast('Siparişi tamamlamak için lütfen giriş yapın.', 'info')
+      setAuthModalOpen(true)
+      return
+    }
+
     if (cartItems.length === 0) return
 
     const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)

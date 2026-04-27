@@ -32,8 +32,22 @@ export default function CustomerHeader() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {/* Cart (Always Visible) */}
+          <button 
+            onClick={() => setCustomerView('cart')}
+            className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors relative group"
+          >
+            <CartIcon className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
+            {cartCount > 0 && (
+              <span className="absolute top-1 right-3 w-3.5 h-3.5 bg-primary text-white text-[8px] font-bold rounded-full flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+            <span className="text-[10px] text-muted-foreground group-hover:text-primary">Sepetim</span>
+          </button>
+
           {!isLoggedIn ? (
-            <Button onClick={() => setAuthModalOpen(true)} className="rounded-xl px-6 font-bold shadow-lg shadow-primary/20">
+            <Button onClick={() => setAuthModalOpen(true)} className="rounded-xl px-6 font-bold shadow-lg shadow-primary/20 h-10">
               Giriş Yap
             </Button>
           ) : (
@@ -60,7 +74,7 @@ export default function CustomerHeader() {
                 <span className="text-[10px] text-muted-foreground group-hover:text-primary line-clamp-1">{userName}</span>
               </button>
 
-              {/* Customer Features (Hidden if Admin) */}
+              {/* Favorites (Only if logged in) */}
               {userRole !== 'admin' && (
                 <>
                   <button 
@@ -74,19 +88,6 @@ export default function CustomerHeader() {
                       </span>
                     )}
                     <span className="text-[10px] text-muted-foreground group-hover:text-primary">Favoriler</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setCustomerView('cart')}
-                    className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md hover:bg-muted transition-colors relative group"
-                  >
-                    <CartIcon className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
-                    {cartCount > 0 && (
-                      <span className="absolute top-1 right-3 w-3.5 h-3.5 bg-primary text-white text-[8px] font-bold rounded-full flex items-center justify-center">
-                        {cartCount}
-                      </span>
-                    )}
-                    <span className="text-[10px] text-muted-foreground group-hover:text-primary">Sepetim</span>
                   </button>
 
                   <button 
