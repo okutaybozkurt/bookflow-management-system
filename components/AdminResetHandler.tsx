@@ -5,7 +5,7 @@ import { useApp } from '@/lib/store'
 import { Loader2, ShieldCheck, Trash2 } from 'lucide-react'
 
 export default function AdminResetHandler() {
-  const { addToast } = useApp()
+  const { addToast, userRole } = useApp()
   const [resetState, setResetState] = useState<{ active: boolean; mode: 'golden' | 'junk' | null }>({
     active: false,
     mode: null
@@ -25,6 +25,7 @@ export default function AdminResetHandler() {
 
         if (mode) {
           e.preventDefault()
+
           const confirmMsg = mode === 'golden'
             ? 'Sunum Moduna (Altın Veri) geçilsin mi?'
             : 'Demo Moduna (Kirli Veri) geri dönülsün mü?'
