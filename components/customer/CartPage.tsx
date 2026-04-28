@@ -66,7 +66,7 @@ export default function CartPage() {
               <ShoppingBag className="w-4 h-4" />
               Ürün Listesi
             </div>
-            {cartItems.map((item) => (
+            {cartItems.map((item, index) => (
               <div key={item.id} className="bg-white border border-border rounded-xl p-4 flex gap-4">
                 <button onClick={() => openBook(item)} className="shrink-0">
                   <div className="w-20 h-28 relative rounded-lg overflow-hidden bg-muted">
@@ -74,6 +74,7 @@ export default function CartPage() {
                       src={item.cover}
                       alt={item.title}
                       fill
+                      priority={index === 0}
                       className="object-cover"
                       sizes="80px"
                     />

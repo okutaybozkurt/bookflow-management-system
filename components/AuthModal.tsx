@@ -18,7 +18,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [name, setName] = useState('')
   const { login, addToast } = useApp()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!email || !password) {
@@ -26,21 +26,44 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return
     }
 
-    // Role simulation logic
-    const isAdmin = email === 'admin@kitapussu.com' && password === '1234'
-    const role = isAdmin ? 'admin' : 'customer'
+    if (tab === 'register' && !name) {
+      addToast('Lütfen adınızı girin', 'error')
+      return
+    }
 
-    login(role, email, tab === 'register' ? name : undefined)
-    addToast(
-      isAdmin ? 'Admin Paneline hoş geldiniz!' : 'Giriş başarılı!',
-      'success'
-    )
+    try {
+      const endpoint = tab === 'register' ? '/api/auth/register' : '/api/auth/login';
+      const bodyPayload = tab === 'register' ? { email, password, name } : { email, password };
 
-    // Reset form and close
-    setEmail('')
-    setPassword('')
-    setName('')
-    onClose()
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyPayload)
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        addToast(data.error || (tab === 'register' ? 'Kayıt başarısız' : 'Giriş başarısız'), 'error')
+        return
+      }
+
+      const user = await res.json()
+      
+      login(user.role.toLowerCase() as any, user.email, user.name || undefined, user.id)
+      addToast(
+        tab === 'register' ? 'Kayıt başarılı, hoş geldiniz!' : (user.role === 'ADMIN' ? 'Admin Paneline hoş geldiniz!' : 'Giriş başarılı!'),
+        'success'
+      )
+
+      // Reset form and close
+      setEmail('')
+      setPassword('')
+      setName('')
+      onClose()
+    } catch (error) {
+      console.error(error)
+      addToast('Bağlantı hatası.', 'error')
+    }
   }
 
   if (!isOpen) return null

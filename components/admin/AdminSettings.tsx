@@ -5,13 +5,37 @@ import { HelpCircle, Sparkles, FlaskConical, AlertTriangle } from 'lucide-react'
 import { useApp } from '@/lib/store'
 
 export default function AdminSettings() {
-  const { dataMode, setDataMode } = useApp()
-  const [activeMode, setActiveMode] = useState<string | null>(null)
+  const { addToast } = useApp()
+  const [activeMode, setActiveMode] = useState<'golden' | 'junk' | null>(null)
 
-  const applyMode = (mode: 'golden' | 'junk') => {
+  const applyMode = async (mode: 'golden' | 'junk') => {
     setActiveMode(mode)
-    setDataMode(mode)
-    setTimeout(() => setActiveMode(null), 2000)
+    const confirmMsg = mode === 'golden'
+      ? 'Sunum Moduna (Altın Veri) geçilsin mi?'
+      : 'Demo Moduna (Kirli Veri) geri dönülsün mü?'
+
+    if (confirm(confirmMsg)) {
+      try {
+        const res = await fetch('/api/admin/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode }),
+        })
+
+        if (res.ok) {
+          addToast(mode === 'golden' ? 'Sunum Hazır! (Altın Veri)' : 'Demo Modu Aktif (Kirli Veri)', 'success')
+          setTimeout(() => window.location.reload(), 1500)
+        } else {
+          addToast('Bir hata oluştu.', 'error')
+          setActiveMode(null)
+        }
+      } catch (error) {
+        addToast('Bağlantı hatası.', 'error')
+        setActiveMode(null)
+      }
+    } else {
+      setActiveMode(null)
+    }
   }
 
   return (
@@ -73,19 +97,14 @@ export default function AdminSettings() {
             </p>
             <button
               onClick={() => applyMode('golden')}
+              disabled={activeMode !== null}
               className={`w-full py-2 rounded-lg text-xs font-semibold transition-all ${
-                dataMode === 'golden'
-                  ? activeMode === 'golden'
-                    ? 'bg-green-500 text-white'
-                    : 'bg-primary/10 text-primary border border-primary/30 cursor-default'
+                activeMode === 'golden'
+                  ? 'bg-green-500 text-white border-transparent'
                   : 'bg-primary hover:bg-primary/90 text-white'
               }`}
             >
-              {activeMode === 'golden'
-                ? '✓ Uygulandı!'
-                : dataMode === 'golden'
-                ? '✓ Aktif - Golden Data'
-                : 'Golden Data Seed Uygula'}
+              {activeMode === 'golden' ? 'Uygulanıyor...' : 'Golden Data Seed Uygula'}
             </button>
           </div>
 
@@ -109,29 +128,17 @@ export default function AdminSettings() {
             </p>
             <button
               onClick={() => applyMode('junk')}
+              disabled={activeMode !== null}
               className={`w-full py-2 rounded-lg text-xs font-semibold transition-all border ${
-                dataMode === 'junk'
-                  ? activeMode === 'junk'
-                    ? 'bg-green-500 text-white border-transparent'
-                    : 'bg-amber-50 text-amber-700 border-amber-300 cursor-default'
+                activeMode === 'junk'
+                  ? 'bg-amber-500 text-white border-transparent'
                   : 'bg-foreground hover:bg-foreground/80 text-white border-transparent'
               }`}
             >
-              {activeMode === 'junk'
-                ? '✓ Uygulandı!'
-                : dataMode === 'junk'
-                ? '⚠ Aktif - Junk Data'
-                : 'Junk Data Seed Uygula'}
+              {activeMode === 'junk' ? 'Uygulanıyor...' : 'Junk Data Seed Uygula'}
             </button>
           </div>
         </div>
-
-        {dataMode === 'junk' && (
-          <div className="mt-3 flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-3 py-2">
-            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-            <span className="text-xs font-medium">Junk Data modu aktif — uygulama test verileriyle çalışıyor.</span>
-          </div>
-        )}
       </div>
     </div>
   )

@@ -11,7 +11,8 @@ interface AppContextType {
   userRole: UserRole
   userEmail: string
   userName: string
-  login: (role: UserRole, email: string, name?: string) => void
+  userId: string
+  login: (role: UserRole, email: string, name?: string, id?: string) => void
   logout: () => void
 
   // Navigation
@@ -43,6 +44,7 @@ interface AppContextType {
   selectedBook: Book | null
 
   orders: Order[]
+  setOrders: (orders: Order[]) => void
   createOrder: () => void
 
   // UI
@@ -81,6 +83,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     auth.userRole, 
     auth.userName, 
     auth.userEmail, 
+    auth.userId,
     addToast, 
     setAuthModalOpen, 
     data.setBooks, 
@@ -88,8 +91,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   // --- Auth Wrapper with Redirect Logic ---
-  const login = (role: UserRole, email: string, name?: string) => {
-    auth.login(role, email, name, () => {
+  const login = (role: UserRole, email: string, name?: string, id?: string) => {
+    auth.login(role, email, name, id, () => {
       if (role !== 'admin' && cart.cartItems.length > 0) {
         setCustomerView('cart')
       }
@@ -101,6 +104,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCustomerView('book-detail')
   }
 
+  const logout = () => {
+    auth.logout()
+    setCustomerView('home')
+  }
+
   return (
     <AppContext.Provider
       value={{
@@ -108,7 +116,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...data,
         ...cart,
         login,
-        logout: auth.logout,
+        logout,
         customerView, setCustomerView, adminPage, setAdminPage,
         isAuthModalOpen, setAuthModalOpen,
         toasts, addToast, removeToast,

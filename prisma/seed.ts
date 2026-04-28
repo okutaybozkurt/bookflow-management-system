@@ -29,6 +29,18 @@ async function main() {
     },
   });
 
+  // 1.5. Test User
+  await prisma.user.upsert({
+    where: { email: "deneme@gmail.com" },
+    update: {},
+    create: {
+      email: "deneme@gmail.com",
+      password: "1234",
+      name: "Deneme Kullanıcısı",
+      role: "USER",
+    },
+  });
+
   // 2. Çöp Kategoriler
   const cat1 = await prisma.category.create({ data: { name: "asdasd_kategori" } });
   const cat2 = await prisma.category.create({ data: { name: "test_deneme_kat" } });

@@ -5,17 +5,20 @@ export function useAuth() {
   const [userRole, setUserRole] = useState<UserRole>('guest')
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
+  const [userId, setUserId] = useState('')
   const [isAdminView, setIsAdminView] = useState(false)
 
   useEffect(() => {
     const savedRole = localStorage.getItem('userRole') as UserRole
     const savedEmail = localStorage.getItem('userEmail')
     const savedName = localStorage.getItem('userName')
+    const savedUserId = localStorage.getItem('userId')
     const savedIsAdminView = localStorage.getItem('isAdminView') === 'true'
 
     if (savedRole) setUserRole(savedRole)
     if (savedEmail) setUserEmail(savedEmail)
     if (savedName) setUserName(savedName)
+    if (savedUserId) setUserId(savedUserId)
     if (savedRole === 'admin') setIsAdminView(savedIsAdminView)
   }, [])
 
@@ -24,19 +27,22 @@ export function useAuth() {
       localStorage.setItem('userRole', userRole)
       localStorage.setItem('userEmail', userEmail)
       localStorage.setItem('userName', userName)
+      localStorage.setItem('userId', userId)
       localStorage.setItem('isAdminView', isAdminView.toString())
     } else {
       localStorage.removeItem('userRole')
       localStorage.removeItem('userEmail')
       localStorage.removeItem('userName')
+      localStorage.removeItem('userId')
       localStorage.removeItem('isAdminView')
     }
-  }, [userRole, userEmail, userName, isAdminView])
+  }, [userRole, userEmail, userName, userId, isAdminView])
 
-  const login = (role: UserRole, email: string, name?: string, onLogin?: () => void) => {
+  const login = (role: UserRole, email: string, name?: string, id?: string, onLogin?: () => void) => {
     setUserRole(role)
     setUserEmail(email)
     setUserName(name || email.split('@')[0])
+    setUserId(id || '')
     if (role === 'admin') setIsAdminView(true)
     if (onLogin) onLogin()
   }
@@ -45,12 +51,13 @@ export function useAuth() {
     setUserRole('guest')
     setUserEmail('')
     setUserName('')
+    setUserId('')
     setIsAdminView(false)
   }
 
   return {
-    userRole, userEmail, userName, isAdminView,
-    setUserRole, setUserEmail, setUserName, setIsAdminView,
+    userRole, userEmail, userName, userId, isAdminView,
+    setUserRole, setUserEmail, setUserName, setUserId, setIsAdminView,
     login, logout
   }
 }

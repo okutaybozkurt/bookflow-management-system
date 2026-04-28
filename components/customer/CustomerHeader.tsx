@@ -9,7 +9,7 @@ import AdvancedSearch from './AdvancedSearch'
 export default function CustomerHeader() {
   const { userRole, logout, cartItems, favoriteIds, userName, setCustomerView, setIsAdminView, setAuthModalOpen } = useApp()
 
-  const isLoggedIn = userRole === 'customer' || userRole === 'admin'
+  const isLoggedIn = userRole !== 'guest'
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0)
 
   return (
