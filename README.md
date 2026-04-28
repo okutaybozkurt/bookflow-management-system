@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="public/icon.svg" alt="KitapÜssü Logo" width="150" />
   <h1>KİTAPÜSSÜ</h1>
   <p><strong>Kitap Yönetim ve Satış Sistemi</strong></p>
 </div>
