@@ -124,7 +124,41 @@ Ayrıca Laravel Sanctum'un oluşturduğu `personal_access_tokens` tablosu vardı
 
 ## MySQL Workbench'te görüntüleme (macOS)
 
-1. `mysql -u root -p -e "CREATE DATABASE bookflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"`
-2. `backend/.env` içinde `DB_*` bilgilerini girin, `cd backend && php artisan migrate`
-3. Workbench: **Database → Reverse Engineer…** → `bookflow` şemasını seçin → EER diyagramı oluşur.
-   (Alternatif: **File → Run SQL Script…** ile `docs/schema.sql`.)
+> `.env` dosyası şifre içerdiği için Git'e **gönderilmez** (`.gitignore`'dadır). Her geliştirici kendi bilgisayarında oluşturur.
+
+**1. Bağlantı bilgilerini hazırlayın.** Workbench'te sol üstteki bağlantı kutusuna (ör. `Local instance MySQL`) sağ tıklayıp *Edit Connection* deyin; oradaki **Hostname**, **Port** ve **Username** değerlerini not alın. Şifre, MySQL kurulumunda belirlediğiniz şifredir.
+
+**2. `.env` dosyasını oluşturun ve doldurun.**
+
+```bash
+cd backend
+cp .env.example .env
+php artisan key:generate
+```
+
+`backend/.env` içinde şu satırları kendi bilgilerinize göre düzenleyin:
+
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=bookflow
+DB_USERNAME=root          # Workbench bağlantınızdaki kullanıcı adı
+DB_PASSWORD=sifreniz      # Workbench'e girerken kullandığınız şifre
+```
+
+**3. Veritabanını ve tabloları oluşturun.**
+
+```bash
+mysql -u root -p -e "CREATE DATABASE bookflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+php artisan migrate --seed
+```
+
+Terminalde `mysql` bulunamazsa Workbench'te yeni bir SQL sekmesi açıp `CREATE DATABASE bookflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` komutunu çalıştırabilirsiniz.
+
+**4. ER (EER) diyagramını oluşturun.**
+
+- Workbench: **Database → Reverse Engineer…** → bağlantınızı seçin → `bookflow` şemasını işaretleyin → *Continue* ile bitirin. Tablolar, sütunlar ve ilişki çizgileri diyagramda görünür.
+- Alternatif (Laravel'i çalıştırmadan): **File → Open SQL Script…** ile `docs/schema.sql` dosyasını açın, yıldırım (⚡) simgesiyle çalıştırın, ardından yukarıdaki Reverse Engineer adımını izleyin.
+
+Tabloları ve sütunları liste halinde görmek için sol panelde **Schemas → bookflow → Tables** altını genişletin.
