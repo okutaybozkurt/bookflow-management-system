@@ -6,17 +6,30 @@ import BookCard from './BookCard'
 import CategoryBar from './CategoryBar'
 
 export default function BooksGrid() {
-  const { books, catalogLoading, catalogError, refreshCatalog } = useApp()
+  const { books, catalogLoading, catalogError, refreshCatalog, catalogSearch, setCatalogSearch } = useApp()
   const [activeCategory, setActiveCategory] = useState('Hepsi')
 
-  const filteredBooks = activeCategory === 'Hepsi' 
-    ? books 
-    : books.filter(book => book.category === activeCategory)
+  const term = catalogSearch.toLocaleLowerCase('tr-TR')
+  const filteredBooks = books.filter((book) =>
+    (activeCategory === 'Hepsi' || book.category === activeCategory) &&
+    (!term || [book.title, book.author, book.isbn ?? ''].some((v) => v.toLocaleLowerCase('tr-TR').includes(term)))
+  )
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
       <CategoryBar activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
       
+      {catalogSearch && (
+        <div className="mb-6 flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
+          <p className="text-sm text-foreground">
+            <strong>&quot;{catalogSearch}&quot;</strong> için {filteredBooks.length} sonuç bulundu
+          </p>
+          <button onClick={() => setCatalogSearch('')} className="text-sm font-semibold text-primary hover:underline">
+            Aramayı temizle
+          </button>
+        </div>
+      )}
+
       {/* Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-foreground text-white p-8 mb-8">
         <div className="relative z-10">
@@ -60,6 +73,7 @@ export default function BooksGrid() {
       )}
 
       {/* More section */}
+      {!catalogSearch && (<>
       <div className="mt-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 bg-primary rounded-full" />
@@ -71,6 +85,7 @@ export default function BooksGrid() {
           <BookCard key={'new-' + book.id} book={book} />
         ))}
       </div>
+      </>)}
     </section>
   )
 }
