@@ -17,6 +17,8 @@ class UserResource extends JsonResource
             'role' => $this->role->value,
             'phone' => $this->phone,
             'address' => $this->address,
+            'orders_count' => $this->whenCounted('orders'),
+            'deleted_at' => $this->deleted_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

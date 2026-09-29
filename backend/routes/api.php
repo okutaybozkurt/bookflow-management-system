@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AuthorController;
@@ -7,7 +8,9 @@ use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 // --- Herkese açık ---
@@ -58,4 +61,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     Route::apiResource('categories', CategoryController::class)->only(['store', 'update', 'destroy']);
     Route::apiResource('authors', AuthorController::class)->only(['store', 'update', 'destroy']);
+
+    Route::apiResource('users', UserController::class);
+    Route::post('users/{user}/restore', [UserController::class, 'restore'])->withTrashed();
+
+    Route::prefix('reports')->group(function () {
+        Route::get('summary', [ReportController::class, 'summary']);
+        Route::get('sales', [ReportController::class, 'sales']);
+        Route::get('top-books', [ReportController::class, 'topBooks']);
+        Route::get('categories', [ReportController::class, 'categories']);
+        Route::get('low-stock', [ReportController::class, 'lowStock']);
+    });
+
+    Route::get('activity-logs', [ActivityLogController::class, 'index']);
 });

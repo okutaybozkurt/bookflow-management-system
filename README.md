@@ -69,7 +69,7 @@ docs/       ER diyagramı, MySQL şeması, mimari notlar
 - Veritabanı mimarisi ve ER diyagramı: [docs/ER-DIYAGRAMI.md](docs/ER-DIYAGRAMI.md)
 - Kod mimarisi, SOLID ve tasarım desenleri: [docs/MIMARI.md](docs/MIMARI.md)
 
-> **Geçiş durumu:** Backend (Laravel) veri modeli ve kimlik doğrulama tamamlandı. Frontend şu an eski Next.js/Prisma API'sini kullanıyor; Laravel API'sine bağlanması bir sonraki aşamalardadır.
+> **Geçiş durumu:** Backend (Laravel) REST API'si tamamlandı. Frontend şu an eski Next.js/Prisma API'sini kullanıyor; Laravel API'sine bağlanması bir sonraki aşamalardadır.
 
 ## Backend Kurulumu (Laravel + MySQL)
 
@@ -83,6 +83,7 @@ composer install
 cp .env.example .env          # DB_USERNAME / DB_PASSWORD değerlerini düzenleyin
 php artisan key:generate
 php artisan migrate --seed   # tablolar + demo kullanıcılar
+php artisan storage:link      # kitap kapak görselleri için
 php artisan test              # testleri çalıştırır
 php artisan serve             # http://localhost:8000
 ```
@@ -94,17 +95,57 @@ php artisan serve             # http://localhost:8000
 | Yönetici | admin@bookflow.com | Admin1234 |
 | Müşteri | musteri@bookflow.com | Musteri1234 |
 
-### Kimlik doğrulama API'si
+### REST API uç noktaları
 
-| Metot | Uç nokta | Açıklama | Yetki |
-|---|---|---|---|
-| POST | `/api/auth/register` | Kayıt (her zaman müşteri), token döner → 201 | Herkes |
-| POST | `/api/auth/login` | Giriş, token döner → 200 / 422 | Herkes |
-| POST | `/api/auth/logout` | Token'ı iptal eder | Giriş yapmış |
-| GET | `/api/me` | Oturumdaki kullanıcı | Giriş yapmış |
-| PUT | `/api/me` | Profil / şifre güncelleme | Giriş yapmış |
+Tüm uçlar `/api` altındadır. Kimlik gerektiren isteklerde `Authorization: Bearer <token>` başlığı kullanılır. Token 7 gün geçerlidir; giriş/kayıt dakikada 10 istekle sınırlıdır. Listeler `{ data, links, meta }` biçiminde sayfalanır.
 
-İstekler `Authorization: Bearer <token>` başlığıyla yapılır. Token 7 gün geçerlidir. Giriş/kayıt dakikada 10 istekle sınırlıdır.
+**Herkese açık**
+
+| Metot | Uç nokta | Açıklama |
+|---|---|---|
+| POST | `/auth/register` | Kayıt (her zaman müşteri) → 201 |
+| POST | `/auth/login` | Giriş, token döner |
+| GET | `/books` | Aktif kitaplar. Parametreler: `search`, `category_id`, `author_id`, `min_price`, `max_price`, `in_stock`, `sort` (`newest`, `price_asc`, `price_desc`, `title`, `popular`), `per_page` |
+| GET | `/books/{id}` | Kitap detayı (ortalama puan, satış adedi) |
+| GET | `/books/{id}/reviews` | Kitap yorumları |
+| GET | `/categories`, `/authors` | Listeler (kitap sayısıyla) |
+
+**Giriş yapmış kullanıcı**
+
+| Metot | Uç nokta | Açıklama |
+|---|---|---|
+| POST | `/auth/logout` | Token'ı iptal eder |
+| GET / PUT | `/me` | Profil görüntüleme / güncelleme (şifre değişimi mevcut şifre ister) |
+| GET | `/favorites` | Favori kitaplar |
+| POST / DELETE | `/favorites/{book}` | Favoriye ekle / çıkar |
+| POST | `/books/{book}/reviews` | Yorum ekle (kitap başına tek yorum, aksi 409) |
+| PUT / DELETE | `/reviews/{id}` | Yorumu güncelle (sahibi) / sil (sahibi veya yönetici) |
+| GET | `/orders`, `/orders/{id}` | Yalnızca kendi siparişleri |
+| POST | `/orders` | Sipariş ver: `{ items: [{ book_id, quantity }], shipping_address }` |
+| POST | `/orders/{id}/cancel` | Bekleyen siparişi iptal et (stok iade edilir) |
+
+**Yönetici (`/admin`, yalnızca admin rolü)**
+
+| Metot | Uç nokta | Açıklama |
+|---|---|---|
+| GET | `/admin/books`, `/admin/books/{id}` | Pasif ve (`with_trashed=1`) silinmiş kitaplar dahil |
+| POST | `/admin/books` | Kitap ekle (JSON veya kapak dosyası için `multipart/form-data`, alan: `cover`) |
+| PUT / PATCH | `/admin/books/{id}` | Kitap güncelle (dosya yüklemede `POST` + `_method=PUT`) |
+| DELETE | `/admin/books/{id}` | Soft delete → 204 |
+| POST | `/admin/books/{id}/restore` | Silinen kitabı geri getir |
+| POST / PUT / DELETE | `/admin/categories`, `/admin/authors` | CRUD; kitabı olan kayıt silinemez (409) |
+| GET / POST / PUT / DELETE | `/admin/users`, `/admin/users/{id}` | Kullanıcı yönetimi (soft delete; kendini silme/rol değiştirme engelli) |
+| POST | `/admin/users/{id}/restore` | Silinen kullanıcıyı geri getir |
+| GET | `/admin/orders`, `/admin/orders/{id}` | Tüm siparişler (`status`, `search` filtresi) |
+| PATCH | `/admin/orders/{id}/status` | Durum güncelle (`pending → shipped → delivered`, iptal) |
+| GET | `/admin/reports/summary` | Toplam gelir, sipariş, satılan kitap, düşük stok, müşteri sayısı |
+| GET | `/admin/reports/sales` | Dönemsel gelir: `period=monthly\|yearly`, `count` |
+| GET | `/admin/reports/top-books`, `/categories`, `/low-stock` | Çok satanlar, kategori satışları, düşük stok |
+| GET | `/admin/activity-logs` | İşlem kayıtları (`user_id`, `action`, `subject_type`, `from`, `to`) |
+
+**HTTP durum kodları:** `200/201/204` başarı, `401` oturum yok, `403` yetki yok, `404` kayıt yok, `409` iş kuralı ihlali (yetersiz stok, ilişkili kayıt, geçersiz durum geçişi), `422` doğrulama hatası (`errors` alanıyla). Tüm hatalar `{ "message": "..." }` biçimindedir.
+
+**Sipariş kuralları (backend'de):** fiyat ve toplam sunucuda veritabanı fiyatlarından hesaplanır; 500 TL üzeri kargo ücretsizdir, altında 29,90 TL'dir. Stok kontrolü ve düşümü tek transaction içindedir.
 
 ## Frontend Kurulumu (geçici)
 
