@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useApp } from '@/lib/store'
 
 export default function AdvancedSearch() {
-  const { books, categories, openBook } = useApp()
+  const { books, categories, openBook, setCatalogSearch, setCustomerView } = useApp()
   const [searchQuery, setSearchQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -42,8 +42,17 @@ export default function AdvancedSearch() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // "Ara" / Enter: aramayı vitrine uygular ve sonuçları kitap listesinde gösterir
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setCatalogSearch(searchQuery.trim())
+    setCustomerView('home')
+    setIsOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
-    <div className="flex-1 flex items-center gap-2 max-w-2xl mx-auto relative">
+    <form onSubmit={submitSearch} className="flex-1 flex items-center gap-2 max-w-2xl mx-auto relative">
       <div className="relative flex-1" ref={inputRef}>
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
@@ -150,10 +159,10 @@ export default function AdvancedSearch() {
         )}
       </div>
 
-      <button className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
+      <button type="submit" className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
         <Search className="w-4 h-4" />
         <span className="hidden sm:inline">Ara</span>
       </button>
-    </div>
+    </form>
   )
 }

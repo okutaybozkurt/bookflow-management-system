@@ -52,6 +52,10 @@ interface AppContextType {
   createOrder: (shippingAddress: string) => Promise<void>
   cancelOrder: (order: Order) => Promise<void>
 
+  // Vitrin araması (arama kutusundaki "Ara" ile uygulanır)
+  catalogSearch: string
+  setCatalogSearch: (query: string) => void
+
   // UI
   addToast: (message: string, type: 'success' | 'error' | 'info') => void
   removeToast: (id: string) => void
@@ -67,6 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [customerView, setCustomerView] = useState<CustomerView>('home')
   const [adminPage, setAdminPage] = useState<AdminPage>('dashboard')
   const [isAuthModalOpen, setAuthModalOpen] = useState(false)
+  const [catalogSearch, setCatalogSearch] = useState('')
   const [toasts, setToasts] = useState<Toast[]>([])
 
   // --- UI Handlers ---
@@ -123,7 +128,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isAdminView: auth.isAdminView, setIsAdminView: auth.setIsAdminView,
         ...data,
         ...cart,
-        customerView, setCustomerView, adminPage, setAdminPage,
+        customerView, setCustomerView, adminPage, setAdminPage, catalogSearch, setCatalogSearch,
         isAuthModalOpen, setAuthModalOpen,
         toasts, addToast, removeToast,
         openBook,
