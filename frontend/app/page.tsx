@@ -6,7 +6,6 @@ import CustomerPage from '@/components/customer/CustomerPage'
 import AdminLayout from '@/components/admin/AdminLayout'
 import ToastContainer from '@/components/ToastContainer'
 
-import AdminResetHandler from '@/components/AdminResetHandler'
 import SupportChat from '@/components/SupportChat'
 
 function AppRouter() {
@@ -40,7 +39,6 @@ function AppRouter() {
 export default function Home() {
   return (
     <AppProvider>
-      <AdminResetHandler />
       <AppRouter />
     </AppProvider>
   )

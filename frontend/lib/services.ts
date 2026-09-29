@@ -282,7 +282,7 @@ export const reportsApi = {
   lowStock: async () => (await api<{ data: LowStockBook[] }>('/admin/reports/low-stock')).data,
 }
 
-// ---------- İşlem kayıtları & demo ----------
+// ---------- İşlem kayıtları ----------
 
 export interface ActivityLogEntry {
   id: number; action: string; description: string; subject_type: string | null
@@ -294,8 +294,4 @@ export const logsApi = {
   async list(query: { action?: string; subject_type?: string; page?: number } = {}) {
     return api<Paginated<ActivityLogEntry>>('/admin/activity-logs', { query: { ...query, per_page: 20 } })
   },
-}
-
-export const demoApi = {
-  reset: (mode: 'golden' | 'junk') => api('/admin/reset', { method: 'POST', body: { mode } }),
 }

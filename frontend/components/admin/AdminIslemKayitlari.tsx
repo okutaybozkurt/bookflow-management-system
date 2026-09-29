@@ -9,7 +9,6 @@ import ReportState from './ReportState'
 const ACTIONS: Record<string, string> = {
   registered: 'Kayıt', login: 'Giriş', logout: 'Çıkış', created: 'Ekleme', updated: 'Güncelleme',
   deleted: 'Silme', restored: 'Geri getirme', order_created: 'Sipariş', status_changed: 'Durum değişimi',
-  demo_reset: 'Veri sıfırlama',
 }
 const SUBJECTS = ['Book', 'Category', 'Author', 'Order', 'User']
 const SUBJECT_LABEL: Record<string, string> = { Book: 'Kitap', Category: 'Kategori', Author: 'Yazar', Order: 'Sipariş', User: 'Kullanıcı' }

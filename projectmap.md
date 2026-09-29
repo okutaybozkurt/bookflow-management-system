@@ -1,33 +1,30 @@
-# 🗺️ KitapÜssü Roadmap
+# 🗺️ BookFlow Yol Haritası
 
-Bu dosya projenin mutfağındaki iş listesidir.
-
----
-
-## 1. Aşama: Temeller ve UI/UX (Tamamlandı ✅)
-- [x] KitapÜssü marka kimliğinin oluşturulması (Siyah-Turuncu-Beyaz).
-- [x] v0 ile profesyonel frontend prototipinin (Trendyol/Hepsiburada stili) hazırlanması.
-- [x] GitHub reposunun kurulumu ve ana kodların pushlanması.
-- [x] Temel sayfa yapılarının (Müşteri, Admin, Kitap Detay) oluşturulması.
+Projenin durumunu ve kalan işleri gösterir.
 
 ---
 
-## 2. Aşama: Backend ve Veri Mimarisi (Tamamlandı ✅)
-- [x] Backend Teknolojisi Seçimi: Next.js API Handlers + Prisma + SQLite.
-- [x] Veritabanı Tasarımı: Kitaplar, Kategoriler, Yazarlar ve Kullanıcılar modelleri kuruldu.
-- [x] Auth (Yetkilendirme): Admin ve User rolleri şemaya eklendi.
-- [x] Dinamik Veri Akışı: Kitap verileri veritabanından çekilmeye başlandı.
+## 1. Mimari (Tamamlandı ✅)
+- [x] Backend (Laravel REST API) ve frontend (React / Next.js) ayrı klasörlerde: `backend/`, `frontend/`
+- [x] MySQL veri modeli: 9 tablo (users, authors, categories, books, orders, order_items, favorites, reviews, activity_logs)
+- [x] ER diyagramı ve MySQL şeması: `docs/`
 
----
+## 2. Backend (Tamamlandı ✅)
+- [x] Kayıt / giriş / çıkış (Laravel Sanctum), rol tabanlı yetkilendirme (admin / müşteri)
+- [x] Kitap, kategori, yazar, kullanıcı, sipariş, favori ve yorum CRUD uç noktaları
+- [x] Sipariş iş kuralları: sunucu tarafı fiyat hesabı, stok kontrolü, durum akışı, iptalde stok iadesi
+- [x] Soft delete (kullanıcı, kitap), activity log (işlem kayıtları)
+- [x] Gelir ve satış raporları
+- [x] Doğrulama, tek biçimli hata yanıtları ve doğru HTTP durum kodları
+- [x] Feature testleri
 
-## 3. Aşama: "Admin Reset" ve Mühendislik Dokunuşları (Şu An Buradayız 📍)
-- [x] Sunum Modu (Reset Mechanism): /api/admin/reset endpoint'i hazırlandı.
-- [x] Seeder Yapılandırması: prisma/seed.ts ile Altın Veri (Golden Data) kurgulandı.
-- [x] Kısayol Entegrasyonu: Ctrl + Shift + R kısayolu ile sistem anında sıfırlanabiliyor.
+## 3. Frontend (Tamamlandı ✅)
+- [x] Tek noktadan API istemcisi, token yönetimi, 401'de otomatik çıkış
+- [x] Müşteri: vitrin, arama, sepet, sipariş, favoriler, yorumlar, profil
+- [x] Yönetici: dashboard, kitap / kullanıcı / sipariş yönetimi, raporlar, işlem kayıtları
+- [x] API hatalarının kullanıcıya gösterilmesi
 
----
-
-## 4. Aşama: CRUD ve Fonksiyonellik (Final 🏁)
-- [ ] Admin panelinde kitap ekleme, silme ve düzenleme işlemlerinin veritabanı ile senkronize edilmesi.
-- [ ] Gelir/Gider grafiklerinin gerçek satış verilerinden beslenmesi.
-- [ ] Final testleri ve hocaya sunum provası.
+## 4. Teslim Öncesi (Sıradaki 📍)
+- [ ] Hocanın şart listesine karşı son kontrol (uyum tablosu)
+- [ ] Sunum: proje konusu ve teknoloji yığını (React + Laravel + MySQL) anlatımı
+- [ ] Sunum öncesi tüm akışların baştan sona denenmesi

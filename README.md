@@ -31,7 +31,7 @@ Proje, güncel ve performanslı bir teknoloji yığını ile geliştirilmiştir.
 
 ## Ekran Görüntüleri
 
-Aşağıdaki tabloda projenin farklı modlarına ve panellerine ait ekran görüntülerini inceleyebilirsiniz:
+Projenin müşteri ve yönetim paneline ait ekran görüntüleri:
 
 <table align="center">
   <tr>
@@ -40,17 +40,12 @@ Aşağıdaki tabloda projenin farklı modlarına ve panellerine ait ekran görü
       <img src="frontend/public/main_page.png" alt="Ana Sayfa" width="400"/>
     </td>
     <td align="center">
-      <strong>Demo Modu (Kirli Veriler)</strong><br/>
-      <img src="frontend/public/demo_mode.png" alt="Demo Modu" width="400"/>
-      <br/><em>Test süreçlerini göstermek amacıyla sistemi "kirli" verilerle dolduran mod (yönetici girişiyle Cmd/Ctrl + Shift + D ile erişilebilir; sunum verisi için Cmd/Ctrl + Shift + P).</em>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
       <strong>Admin Paneli - Dashboard</strong><br/>
       <img src="frontend/public/admin_dashboard.png" alt="Admin Dashboard" width="400"/>
     </td>
-    <td align="center">
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
       <strong>Admin Paneli - Kitap Yönetimi</strong><br/>
       <img src="frontend/public/admin_books.png" alt="Admin Kitap Yönetimi" width="400"/>
     </td>
@@ -83,13 +78,13 @@ cd backend
 composer install
 cp .env.example .env          # DB_USERNAME / DB_PASSWORD değerlerini düzenleyin
 php artisan key:generate
-php artisan migrate --seed   # tablolar + demo kullanıcılar
+php artisan migrate --seed   # tablolar + 2 hesap + başlangıç kitap kataloğu
 php artisan storage:link      # kitap kapak görselleri için
 php artisan test              # testleri çalıştırır
 php artisan serve             # http://localhost:8000
 ```
 
-### Demo hesaplar (seeder)
+### Başlangıç hesapları (seeder)
 
 | Rol | E-posta | Şifre |
 |---|---|---|
@@ -159,8 +154,4 @@ cp .env.local.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:8000/a
 npm run dev                        # http://localhost:3000
 ```
 
-Uygulama açıldığında vitrin kitapları API'den gelir. Yönetici olarak giriş yapıp (`admin@bookflow.com`) yönetim panelinden kitap, kullanıcı, sipariş, rapor ve işlem kayıtlarına erişebilirsiniz.
-
-### Sunum / demo modu
-
-Yönetici girişi yapılmışken `Cmd/Ctrl + Shift + P` sunum (altın) verisini, `Cmd/Ctrl + Shift + D` demo (kirli) verisini yükler. Aynı işlem yönetim panelindeki **Ayarlar** sayfasından da yapılabilir. Kitap kataloğu ve örnek siparişler sıfırlanır; kullanıcı hesapları ve işlem kayıtları korunur. Canlı ortamda `DEMO_RESET_ENABLED=false` yapılarak kapatılabilir.
+Uygulama açıldığında vitrin kitapları API'den gelir. Yönetici olarak giriş yapıp (`admin@bookflow.com`) yönetim panelinden kitap, kullanıcı, sipariş, rapor ve işlem kayıtlarına erişebilirsiniz. Sipariş, kullanıcı, rapor ve işlem kayıtları yalnızca uygulamada gerçekten yapılan işlemlerden oluşur; başlangıçta yalnızca 2 hesap ve 15 kitap vardır.
