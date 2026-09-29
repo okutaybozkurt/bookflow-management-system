@@ -5,18 +5,23 @@ import { Search, X, TrendingUp, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import { useApp } from '@/lib/store'
 
-const popularSearches = ['Dünya Klasikleri', 'Bilim Kurgu', 'Yazılım', 'George Orwell', 'Dune', 'Harry Potter']
-
 export default function AdvancedSearch() {
-  const { books, openBook } = useApp()
+  const { books, categories, openBook } = useApp()
   const [searchQuery, setSearchQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Haftanın en çok satanları (Gerçek veriden çekelim)
+  // En çok satanlar: gerçek sipariş verisinden (satışı olmayan kitap listelenmez)
   const topSellers = useMemo(() => {
-    return [...books].sort((a, b) => b.sold - a.sold).slice(0, 4)
+    return [...books].filter((b) => b.sold > 0).sort((a, b) => b.sold - a.sold).slice(0, 4)
   }, [books])
+
+  // Öneriler de katalogdan türetilir: kitabı olan kategoriler ve çok satan yazarlar
+  const suggestions = useMemo(() => {
+    const cats = categories.filter((c) => (c.booksCount ?? 0) > 0).slice(0, 4).map((c) => c.name)
+    const authors = [...new Set(topSellers.map((b) => b.author))].slice(0, 2)
+    return [...cats, ...authors]
+  }, [categories, topSellers])
 
   // Arama sonuçları
   const searchResults = useMemo(() => {
@@ -62,10 +67,10 @@ export default function AdvancedSearch() {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
-                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Popüler Aramalar</h3>
+                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Öneriler</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {popularSearches.map((term) => (
+                    {suggestions.map((term) => (
                       <button
                         key={term}
                         onClick={() => setSearchQuery(term)}
@@ -77,10 +82,11 @@ export default function AdvancedSearch() {
                   </div>
                 </div>
 
+                {topSellers.length > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-3.5 h-3.5 text-primary" />
-                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Haftanın En Çok Satanları</h3>
+                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">En Çok Satanlar</h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {topSellers.map((book) => (
@@ -104,6 +110,7 @@ export default function AdvancedSearch() {
                     ))}
                   </div>
                 </div>
+                )}
               </div>
             ) : (
               /* Yazmaya Başlayınca: Gerçek Sonuçlar */

@@ -1,40 +1,52 @@
 'use client'
 
 import {
-  BookOpen, Globe, BookMarked, FlaskConical, GraduationCap,
-  Baby, Landmark, Brain, Lightbulb, Wand2
+  BookOpen, BookMarked, FlaskConical, Landmark, Brain, Lightbulb,
+  Wand2, Code2, UserRound, type LucideIcon,
 } from 'lucide-react'
+import { useApp } from '@/lib/store'
 
-const categories = [
-  { label: 'Tümü', icon: BookOpen, color: 'text-primary', filterValue: 'Hepsi' },
-  { label: 'Roman', icon: BookMarked, color: 'text-rose-500', filterValue: 'Roman' },
-  { label: 'Bilim', icon: FlaskConical, color: 'text-blue-500', filterValue: 'Bilim' },
-  { label: 'Ansiklopedi', icon: Globe, color: 'text-teal-500', filterValue: 'Ansiklopedi' },
-  { label: 'KPSS', icon: GraduationCap, color: 'text-violet-500', filterValue: 'KPSS' },
-  { label: 'Çocuk', icon: Baby, color: 'text-pink-500', filterValue: 'Çocuk' },
-  { label: 'Tarih', icon: Landmark, color: 'text-amber-600', filterValue: 'Tarih' },
-  { label: 'Felsefe', icon: Brain, color: 'text-indigo-500', filterValue: 'Felsefe' },
-  { label: 'Kişisel Gelişim', icon: Lightbulb, color: 'text-yellow-500', filterValue: 'Kişisel Gelişim' },
-  { label: 'Fantastik', icon: Wand2, color: 'text-purple-500', filterValue: 'Fantastik' },
+/** Kategori adına göre ikon; eşleşme yoksa genel kitap ikonu. */
+const ICONS: [RegExp, LucideIcon][] = [
+  [/klasik|roman/i, BookMarked],
+  [/yaz[ıi]l[ıi]m|bilgisayar|kod/i, Code2],
+  [/ki[şs]isel|geli[şs]im/i, Lightbulb],
+  [/kurgu|fantas/i, Wand2],
+  [/tarih/i, Landmark],
+  [/psikoloji|felsefe/i, Brain],
+  [/biyografi|an[ıi]/i, UserRound],
+  [/bilim|fen/i, FlaskConical],
 ]
+const COLORS = ['text-rose-500', 'text-blue-500', 'text-teal-500', 'text-violet-500', 'text-pink-500', 'text-amber-600', 'text-indigo-500', 'text-yellow-500', 'text-purple-500']
+
+const iconFor = (name: string): LucideIcon => ICONS.find(([re]) => re.test(name))?.[1] ?? BookOpen
 
 interface CategoryBarProps {
   activeCategory: string
   onCategoryChange: (category: string) => void
 }
 
+/** Kategoriler veritabanından gelir; kitabı olmayan kategori gösterilmez. */
 export default function CategoryBar({ activeCategory, onCategoryChange }: CategoryBarProps) {
+  const { categories } = useApp()
+
+  const items = [
+    { label: 'Tümü', icon: BookOpen, color: 'text-primary', filterValue: 'Hepsi' },
+    ...categories
+      .filter((c) => (c.booksCount ?? 0) > 0)
+      .map((c, i) => ({ label: c.name, icon: iconFor(c.name), color: COLORS[i % COLORS.length], filterValue: c.name })),
+  ]
 
   return (
     <div className="bg-white border-b border-border">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center gap-2 overflow-x-auto py-3 scrollbar-hide">
-          {categories.map((cat) => {
+          {items.map((cat) => {
             const Icon = cat.icon
             const isActive = activeCategory === cat.filterValue
             return (
               <button
-                key={cat.label}
+                key={cat.filterValue}
                 onClick={() => onCategoryChange(cat.filterValue)}
                 className={`flex flex-col items-center gap-1.5 px-4 py-2 rounded-xl shrink-0 transition-all border-2 ${
                   isActive
