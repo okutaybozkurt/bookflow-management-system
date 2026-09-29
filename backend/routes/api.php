@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AuthorController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DemoController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReportController;
@@ -74,4 +75,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     });
 
     Route::get('activity-logs', [ActivityLogController::class, 'index']);
+
+    // Sunum/demo modu: kataloğu altın veya kirli veriyle sıfırlar.
+    Route::post('reset', [DemoController::class, 'reset']);
 });

@@ -65,6 +65,9 @@ return [
     |
     */
 
+    // Sunum/demo modunun (POST /api/admin/reset) açık olup olmadığı. Canlıda kapatın.
+    'demo_reset_enabled' => (bool) env('DEMO_RESET_ENABLED', true),
+
     'timezone' => 'UTC',
 
     /*
