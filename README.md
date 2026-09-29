@@ -69,7 +69,7 @@ docs/       ER diyagramı, MySQL şeması, mimari notlar
 - Veritabanı mimarisi ve ER diyagramı: [docs/ER-DIYAGRAMI.md](docs/ER-DIYAGRAMI.md)
 - Kod mimarisi, SOLID ve tasarım desenleri: [docs/MIMARI.md](docs/MIMARI.md)
 
-> **Geçiş durumu:** Backend (Laravel) veri modeli tamamlandı. Frontend şu an eski Next.js/Prisma API'sini kullanıyor; Laravel API'sine bağlanması bir sonraki aşamalardadır.
+> **Geçiş durumu:** Backend (Laravel) veri modeli ve kimlik doğrulama tamamlandı. Frontend şu an eski Next.js/Prisma API'sini kullanıyor; Laravel API'sine bağlanması bir sonraki aşamalardadır.
 
 ## Backend Kurulumu (Laravel + MySQL)
 
@@ -82,10 +82,29 @@ cd backend
 composer install
 cp .env.example .env          # DB_USERNAME / DB_PASSWORD değerlerini düzenleyin
 php artisan key:generate
-php artisan migrate
+php artisan migrate --seed   # tablolar + demo kullanıcılar
 php artisan test              # testleri çalıştırır
 php artisan serve             # http://localhost:8000
 ```
+
+### Demo hesaplar (seeder)
+
+| Rol | E-posta | Şifre |
+|---|---|---|
+| Yönetici | admin@bookflow.com | Admin1234 |
+| Müşteri | musteri@bookflow.com | Musteri1234 |
+
+### Kimlik doğrulama API'si
+
+| Metot | Uç nokta | Açıklama | Yetki |
+|---|---|---|---|
+| POST | `/api/auth/register` | Kayıt (her zaman müşteri), token döner → 201 | Herkes |
+| POST | `/api/auth/login` | Giriş, token döner → 200 / 422 | Herkes |
+| POST | `/api/auth/logout` | Token'ı iptal eder | Giriş yapmış |
+| GET | `/api/me` | Oturumdaki kullanıcı | Giriş yapmış |
+| PUT | `/api/me` | Profil / şifre güncelleme | Giriş yapmış |
+
+İstekler `Authorization: Bearer <token>` başlığıyla yapılır. Token 7 gün geçerlidir. Giriş/kayıt dakikada 10 istekle sınırlıdır.
 
 ## Frontend Kurulumu (geçici)
 

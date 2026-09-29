@@ -2,24 +2,24 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::updateOrCreate(['email' => 'admin@bookflow.com'], [
+            'name' => 'BookFlow Yönetici',
+            'password' => env('ADMIN_PASSWORD', 'Admin1234'),
+            'role' => UserRole::Admin,
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        User::updateOrCreate(['email' => 'musteri@bookflow.com'], [
+            'name' => 'Demo Müşteri',
+            'password' => 'Musteri1234',
+            'role' => UserRole::Customer,
         ]);
     }
 }
