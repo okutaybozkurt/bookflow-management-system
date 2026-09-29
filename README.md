@@ -64,6 +64,7 @@ docs/       ER diyagramı, MySQL şeması, mimari notlar
 
 - Veritabanı mimarisi ve ER diyagramı: [docs/ER-DIYAGRAMI.md](docs/ER-DIYAGRAMI.md)
 - Kod mimarisi, SOLID ve tasarım desenleri: [docs/MIMARI.md](docs/MIMARI.md)
+- Ödev şartlarına uygunluk raporu (madde madde kanıtlı): [docs/UYGUNLUK.md](docs/UYGUNLUK.md)
 
 Frontend'in kendi sunucu tarafı (API route'ları) yoktur; tüm veri Laravel API'sinden gelir. API adresi `frontend/.env.local` içindeki `NEXT_PUBLIC_API_URL` ile verilir.
 
