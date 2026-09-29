@@ -4,17 +4,20 @@ import { useState, useRef, useMemo } from 'react'
 import { Plus as PlusIcon, Search as SearchIcon, Edit2 as EditIcon, Trash2 as TrashIcon, X as XIcon, Loader2 as LoaderIcon, Upload as UploadIcon, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useApp } from '@/lib/store'
+import { errorMessage } from '@/lib/api'
+import { authorsApi, booksApi, categoriesApi } from '@/lib/services'
 
 type Tab = 'list' | 'add' | 'edit'
 
 export default function KitapYonetimi() {
-  const { books, categories, addToast } = useApp()
+  const { adminBooks: books, categories, authors, addToast, refreshCatalog } = useApp()
   const [tab, setTab] = useState<Tab>('list')
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [editingBook, setEditingBook] = useState<any>(null)
   const [isManualCategory, setIsManualCategory] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [coverFile, setCoverFile] = useState<File | null>(null)
 
   const [form, setForm] = useState({
     title: '',
@@ -36,6 +39,7 @@ export default function KitapYonetimi() {
 
   const handleEdit = (book: any) => {
     setEditingBook(book)
+    setCoverFile(null)
     setIsManualCategory(false)
     setForm({
       title: book.title,
@@ -52,62 +56,72 @@ export default function KitapYonetimi() {
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!confirm('Bu kitabı silmek istediğinize emin misiniz?')) return
+    if (!confirm('Bu kitabı silmek istediğinize emin misiniz? (Sipariş geçmişi korunur.)')) return
     try {
-      const res = await fetch(`/api/books/${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        addToast('Kitap silindi.', 'success')
-        setTimeout(() => window.location.reload(), 1000)
-      }
+      await booksApi.remove(id)
+      await refreshCatalog()
+      addToast('Kitap silindi.', 'success')
     } catch (error) {
-      addToast('Silme işlemi başarısız.', 'error')
+      addToast(errorMessage(error, 'Silme işlemi başarısız.'), 'error')
     }
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const img = new window.Image()
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const MAX_WIDTH = 400
-        const scale = MAX_WIDTH / img.width
-        canvas.width = MAX_WIDTH
-        canvas.height = img.height * scale
-        const ctx = canvas.getContext('2d')
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-        const base64 = canvas.toDataURL('image/jpeg', 0.6)
-        setForm({ ...form, cover: base64 })
-      }
-      img.src = event.target?.result as string
+    if (file.size > 2 * 1024 * 1024) {
+      addToast('Kapak görseli en fazla 2 MB olabilir.', 'error')
+      return
     }
-    reader.readAsDataURL(file)
+    // Dosya olduğu gibi backend'e yüklenir; burada yalnızca önizleme üretilir.
+    setCoverFile(file)
+    setForm({ ...form, cover: URL.createObjectURL(file) })
+  }
+
+  /** Yazar/kategori adı mevcutsa kimliğini kullanır, yoksa önce oluşturur. */
+  const resolveAuthorId = async (name: string) => {
+    const clean = name.trim()
+    const found = authors.find((a) => a.name.toLowerCase() === clean.toLowerCase())
+    return found ? found.id : (await authorsApi.create(clean)).id
+  }
+  const resolveCategoryId = async (name: string) => {
+    const clean = name.trim()
+    const found = categories.find((c) => c.name.toLowerCase() === clean.toLowerCase())
+    return found ? found.id : (await categoriesApi.create(clean)).id
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!form.title.trim() || !form.author.trim() || !form.category.trim()) {
+      addToast('Kitap adı, yazar ve kategori zorunludur.', 'error')
+      return
+    }
+
     try {
       setLoading(true)
-      const url = tab === 'edit' ? `/api/books/${editingBook.id}` : '/api/books'
-      const method = tab === 'edit' ? 'PUT' : 'POST'
-      
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      
-      if (res.ok) {
-        addToast(tab === 'edit' ? 'Güncelleme başarılı!' : 'Kitap eklendi!', 'success')
-        setTimeout(() => window.location.reload(), 1000)
-      } else {
-        const err = await res.json()
-        addToast(err.error || 'İşlem başarısız.', 'error')
+      const input = {
+        title: form.title.trim(),
+        price: form.price,
+        stock: form.stock,
+        isbn: form.isbn.trim(),
+        description: form.description,
+        author_id: await resolveAuthorId(form.author),
+        category_id: await resolveCategoryId(form.category),
+        cover: coverFile,
       }
+
+      if (tab === 'edit') await booksApi.update(editingBook.id, input)
+      else await booksApi.create(input)
+
+      await refreshCatalog()
+      addToast(tab === 'edit' ? 'Güncelleme başarılı!' : 'Kitap eklendi!', 'success')
+      setTab('list')
+      setEditingBook(null)
+      setCoverFile(null)
     } catch (error) {
-      addToast('Bağlantı hatası.', 'error')
+      // Doğrulama hataları (ör. "Bu ISBN numarasına sahip bir kitap zaten mevcut.") gösterilir.
+      addToast(errorMessage(error, 'İşlem başarısız.'), 'error')
     } finally {
       setLoading(false)
     }
@@ -128,6 +142,7 @@ export default function KitapYonetimi() {
               setIsManualCategory(false)
             } else {
               setTab('add')
+              setCoverFile(null)
               setForm({ title: '', author: '', price: '', stock: '', isbn: '', category: '', cover: '', description: '' })
               setIsManualCategory(false)
             }

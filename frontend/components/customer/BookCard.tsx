@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
 import { useApp } from '@/lib/store'
@@ -12,25 +12,21 @@ interface BookCardProps {
 }
 
 export default function BookCard({ book, priority }: BookCardProps) {
-  const { userRole, addToCart, favoriteIds, toggleFavorite, openBook, addToast } = useApp()
+  const { addToCart, favoriteIds, toggleFavorite, openBook, addToast } = useApp()
   const [added, setAdded] = useState(false)
-  const [clientData, setClientData] = useState<{ rating: number; reviewCount: number } | null>(null)
 
-  useEffect(() => {
-    setClientData({
-      rating: 4 + Math.random() * 0.9,
-      reviewCount: Math.floor(100 + Math.random() * 900)
-    })
-  }, [])
-
-  const rating = clientData?.rating || 5
-  const reviewCount = clientData?.reviewCount || 0
+  // Puan ve yorum sayısı gerçek yorumlardan gelir (backend hesaplar).
+  const rating: number = book.averageRating ?? 0
+  const reviewCount: number = book.reviewsCount ?? 0
 
   const isFav = favoriteIds.has(book.id)
-  const isLoggedIn = userRole !== 'guest'
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
+    if (book.stock <= 0) {
+      addToast('Bu kitap şu an stokta yok.', 'error')
+      return
+    }
     addToCart(book)
     addToast(`"${book.title}" sepete eklendi!`, 'success')
     setAdded(true)
@@ -58,7 +54,7 @@ export default function BookCard({ book, priority }: BookCardProps) {
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
         />
         {/* Favorite button */}
-        {isLoggedIn && (
+        {(
           <button
             onClick={handleToggleFavorite}
             className={cn(
@@ -97,7 +93,9 @@ export default function BookCard({ book, priority }: BookCardProps) {
               />
             ))}
           </div>
-          <span className="text-[11px] text-muted-foreground">({reviewCount.toLocaleString('tr-TR')})</span>
+          <span className="text-[11px] text-muted-foreground">
+            {reviewCount > 0 ? `${rating.toFixed(1)} (${reviewCount.toLocaleString('tr-TR')})` : 'Henüz yorum yok'}
+          </span>
         </div>
 
         <div className="mt-auto flex items-center justify-between gap-2">

@@ -3,9 +3,10 @@
 import { useApp } from '@/lib/store'
 import { Package, ChevronRight, Clock, Truck, CheckCircle, XCircle } from 'lucide-react'
 import Image from 'next/image'
+import ProfileForms from './ProfileForms'
 
 export default function ProfilePage() {
-  const { orders, userName, userEmail, logout, setCustomerView } = useApp()
+  const { orders, userName, userEmail, logout, setCustomerView, cancelOrder } = useApp()
 
   const statusConfig: Record<string, { label: string; icon: any; color: string; bg: string }> = {
     pending: { label: 'Beklemede', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
@@ -67,7 +68,7 @@ export default function ProfilePage() {
                 const StatusIcon = status.icon
 
                 return (
-                  <div key={order.id} className="bg-white border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                  <div key={order.dbId} className="bg-white border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                     <div className="px-6 py-4 bg-muted/30 border-b border-border flex flex-wrap items-center justify-between gap-4">
                       <div className="flex items-center gap-6">
                         <div>
@@ -89,7 +90,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    <div className="p-6">
+                    <div className="p-6 space-y-4">
                       <div className="flex flex-wrap gap-4">
                         {order.items.map((item) => (
                           <div key={item.id} className="flex gap-3 group">
@@ -104,6 +105,19 @@ export default function ProfilePage() {
                           </div>
                         ))}
                       </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
+                        <p className="text-[11px] text-muted-foreground max-w-md">
+                          <span className="font-semibold text-foreground">Teslimat adresi:</span> {order.shippingAddress}
+                        </p>
+                        {order.status === 'pending' && (
+                          <button
+                            onClick={() => confirm('Siparişiniz iptal edilsin mi?') && cancelOrder(order)}
+                            className="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition-colors"
+                          >
+                            Siparişi İptal Et
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
@@ -112,59 +126,8 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Account Info Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-6 bg-primary rounded-full" />
-              <h2 className="text-lg font-bold text-foreground">Hesap Bilgileri</h2>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Ad Soyad</label>
-                <div className="px-4 py-2 bg-muted/30 border border-border rounded-lg text-sm text-foreground font-medium">
-                  {userName}
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">E-posta Adresi</label>
-                <div className="px-4 py-2 bg-muted/30 border border-border rounded-lg text-sm text-foreground font-medium">
-                  {userEmail}
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Hesap Türü</label>
-                <div className="px-4 py-2 bg-primary/5 border border-primary/20 rounded-lg text-sm text-primary font-bold">
-                  Kullanıcı Hesabı
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-border space-y-2">
-              <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-muted text-xs font-semibold text-foreground transition-colors">
-                Bilgilerimi Güncelle
-              </button>
-              <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-muted text-xs font-semibold text-foreground transition-colors">
-                Şifre Değiştir
-              </button>
-              <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-red-50 text-xs font-semibold text-red-500 transition-colors">
-                Hesabımı Sil
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6">
-            <h3 className="font-bold text-primary text-sm mb-2">Sadakat Programı</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Her alışverişinizde puan kazanın ve bir sonraki kitabınızı indirimli alın!
-            </p>
-            <div className="mt-4 h-2 bg-primary/10 rounded-full overflow-hidden">
-              <div className="w-2/3 h-full bg-primary" />
-            </div>
-            <p className="text-[10px] text-primary font-bold mt-2 text-right">650 / 1000 Puan</p>
-          </div>
-        </div>
+        {/* Account forms */}
+        <ProfileForms />
       </div>
     </div>
   )

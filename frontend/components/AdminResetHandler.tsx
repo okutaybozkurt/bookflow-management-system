@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useApp } from '@/lib/store'
 import { Loader2, ShieldCheck, Trash2 } from 'lucide-react'
+import { DEMO_CONFIRM, runDemoReset } from '@/lib/demo'
 
 export default function AdminResetHandler() {
   const { addToast, userRole } = useApp()
@@ -17,7 +18,8 @@ export default function AdminResetHandler() {
       const isCmd = e.metaKey || e.ctrlKey
       const isShift = e.shiftKey
 
-      if (isCmd && isShift) {
+      // Yalnızca yönetici sunum/demo verisini sıfırlayabilir (backend de ayrıca doğrular).
+      if (userRole === 'admin' && isCmd && isShift) {
         let mode: 'golden' | 'junk' | null = null
 
         if (e.code === 'KeyP') mode = 'golden' // Presentation (Altın)
@@ -26,30 +28,12 @@ export default function AdminResetHandler() {
         if (mode) {
           e.preventDefault()
 
-          const confirmMsg = mode === 'golden'
-            ? 'Sunum Moduna (Altın Veri) geçilsin mi?'
-            : 'Demo Moduna (Kirli Veri) geri dönülsün mü?'
-
-          if (confirm(confirmMsg)) {
-            try {
-              setResetState({ active: true, mode })
-
-              const res = await fetch('/api/admin/reset', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode }),
-              })
-
-              if (res.ok) {
-                addToast(mode === 'golden' ? 'Sunum Hazır! (Altın Veri)' : 'Demo Modu Aktif (Kirli Veri)', 'success')
-                setTimeout(() => window.location.reload(), 1500)
-              } else {
-                setResetState({ active: false, mode: null })
-                addToast('Bir hata oluştu.', 'error')
-              }
-            } catch (error) {
+          if (confirm(DEMO_CONFIRM[mode])) {
+            setResetState({ active: true, mode })
+            if (await runDemoReset(mode, addToast)) {
+              setTimeout(() => window.location.reload(), 1500)
+            } else {
               setResetState({ active: false, mode: null })
-              addToast('Bağlantı hatası.', 'error')
             }
           }
         }
@@ -58,7 +42,7 @@ export default function AdminResetHandler() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [addToast])
+  }, [addToast, userRole])
 
   if (!resetState.active) return null
 

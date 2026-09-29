@@ -3,36 +3,18 @@
 import { useState } from 'react'
 import { HelpCircle, Sparkles, FlaskConical, AlertTriangle } from 'lucide-react'
 import { useApp } from '@/lib/store'
+import { DEMO_CONFIRM, runDemoReset } from '@/lib/demo'
+import { API_URL } from '@/lib/api'
 
 export default function AdminSettings() {
-  const { addToast } = useApp()
+  const { addToast, userName, userEmail } = useApp()
   const [activeMode, setActiveMode] = useState<'golden' | 'junk' | null>(null)
 
   const applyMode = async (mode: 'golden' | 'junk') => {
+    if (!confirm(DEMO_CONFIRM[mode])) return
     setActiveMode(mode)
-    const confirmMsg = mode === 'golden'
-      ? 'Sunum Moduna (Altın Veri) geçilsin mi?'
-      : 'Demo Moduna (Kirli Veri) geri dönülsün mü?'
-
-    if (confirm(confirmMsg)) {
-      try {
-        const res = await fetch('/api/admin/reset', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode }),
-        })
-
-        if (res.ok) {
-          addToast(mode === 'golden' ? 'Sunum Hazır! (Altın Veri)' : 'Demo Modu Aktif (Kirli Veri)', 'success')
-          setTimeout(() => window.location.reload(), 1500)
-        } else {
-          addToast('Bir hata oluştu.', 'error')
-          setActiveMode(null)
-        }
-      } catch (error) {
-        addToast('Bağlantı hatası.', 'error')
-        setActiveMode(null)
-      }
+    if (await runDemoReset(mode, addToast)) {
+      setTimeout(() => window.location.reload(), 1500)
     } else {
       setActiveMode(null)
     }
@@ -45,20 +27,15 @@ export default function AdminSettings() {
         <p className="text-sm text-muted-foreground">Sistem tercihleri ve yapılandırmalar</p>
       </div>
 
-      {/* General Settings */}
+      {/* Hesap ve bağlantı bilgisi (salt okunur) */}
       <div className="bg-white rounded-xl border border-border divide-y divide-border">
         {[
-          { label: 'Bildirimler', desc: 'E-posta ve sistem bildirimlerini yönetin' },
-          { label: 'Güvenlik', desc: 'Şifre ve iki faktörlü kimlik doğrulama' },
-          { label: 'Entegrasyonlar', desc: 'Üçüncü parti uygulama bağlantıları' },
-          { label: 'Dil ve Bölge', desc: 'Türkçe / UTC+3 İstanbul' },
+          { label: 'Oturum açan yönetici', value: `${userName} (${userEmail})` },
+          { label: 'API adresi', value: API_URL },
         ].map((item) => (
           <div key={item.label} className="flex items-center justify-between px-5 py-4">
-            <div>
-              <p className="text-sm font-medium text-foreground">{item.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
-            </div>
-            <button className="text-xs text-primary font-medium hover:underline">Düzenle</button>
+            <p className="text-sm font-medium text-foreground">{item.label}</p>
+            <p className="text-sm text-muted-foreground">{item.value}</p>
           </div>
         ))}
       </div>

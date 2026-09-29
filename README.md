@@ -7,13 +7,13 @@
 
 ## Proje Hakkında
 
-KitapÜssü, modern bir e-ticaret kitap satış platformu ve kapsamlı bir yönetim panelini içeren tam donanımlı bir web uygulamasıdır. Proje; dinamik içerik yönetimi, kullanıcı deneyimi odaklı tasarım, canlı destek entegrasyonu ve güvenli ödeme süreçleri üzerine kurgulanmıştır.
+**BookFlow – Kitap Satış ve Stok Yönetim Platformu**, çevrimiçi kitap satışı ve stok yönetimi için geliştirilmiş bir web uygulamasıdır. Müşteriler kitapları arayıp favorilerine ekler, yorum yapar ve sipariş verir; yöneticiler kitap, stok, kullanıcı ve siparişleri yönetir, satış raporlarını izler.
 
-Sistem iki ana modülden oluşmaktadır:
-1. **Kullanıcı Paneli:** Kitap listeleme, gelişmiş arama, sepet yönetimi ve profesyonel ödeme ekranı.
-2. **Yönetici (Admin) Paneli:** Kitap/kategori yönetimi ve satış istatistikleri.
+Uygulama birbirinden bağımsız iki katmandan oluşur ve yalnızca HTTP/JSON (REST API) ile haberleşir:
+1. **Frontend (React / Next.js):** Müşteri vitrini (arama, sepet, favoriler, sipariş, profil, yorumlar) ve yönetim paneli.
+2. **Backend (PHP / Laravel REST API):** Kimlik doğrulama (Sanctum), rol bazlı yetkilendirme, CRUD işlemleri, sipariş/stok iş kuralları, raporlar ve işlem kayıtları. Veriler MySQL'de tutulur.
 
-Ayrıca platformda akıllı yönlendirmeler sunan bir Canlı Destek Botu bulunmaktadır.
+Ayrıca platformda kural tabanlı bir Canlı Destek Botu bulunmaktadır.
 
 ## Teknoloji Paketi (Tech Stack)
 
@@ -21,12 +21,13 @@ Proje, güncel ve performanslı bir teknoloji yığını ile geliştirilmiştir.
 
 | Kategori | Teknolojiler |
 | :--- | :--- |
-| **Frontend Framework** | Next.js 16 (App Router) |
-| **UI & Bileşenler** | React 19, TypeScript, Radix UI |
-| **Stil & Tasarım** | Tailwind CSS 4, Lucide React (İkonlar) |
-| **Veritabanı & ORM** | MySQL, Prisma ORM |
+| **Frontend** | React 19, Next.js 16 (yalnızca istemci), TypeScript |
+| **UI & Stil** | Tailwind CSS 4, Radix UI, Lucide React, Recharts |
 | **Durum Yönetimi** | React Context API & Custom Hooks |
-| **Form & Doğrulama** | React Hook Form, Zod |
+| **Backend** | PHP 8.3+, Laravel 13 (REST API) |
+| **Kimlik Doğrulama** | Laravel Sanctum (Bearer token), rol tabanlı yetkilendirme |
+| **Veritabanı** | MySQL (Eloquent ORM, migration'lar) |
+| **Test** | PHPUnit (backend feature testleri) |
 
 ## Ekran Görüntüleri
 
@@ -36,22 +37,22 @@ Aşağıdaki tabloda projenin farklı modlarına ve panellerine ait ekran görü
   <tr>
     <td align="center">
       <strong>Ana Sayfa</strong><br/>
-      <img src="public/main_page.png" alt="Ana Sayfa" width="400"/>
+      <img src="frontend/public/main_page.png" alt="Ana Sayfa" width="400"/>
     </td>
     <td align="center">
       <strong>Demo Modu (Kirli Veriler)</strong><br/>
-      <img src="public/demo_mode.png" alt="Demo Modu" width="400"/>
-      <br/><em>Test süreçlerini göstermek amacıyla sistemi "kirli" verilerle dolduran mod (Cmd/Ctrl + Shift + D ile erişilebilir).</em>
+      <img src="frontend/public/demo_mode.png" alt="Demo Modu" width="400"/>
+      <br/><em>Test süreçlerini göstermek amacıyla sistemi "kirli" verilerle dolduran mod (yönetici girişiyle Cmd/Ctrl + Shift + D ile erişilebilir; sunum verisi için Cmd/Ctrl + Shift + P).</em>
     </td>
   </tr>
   <tr>
     <td align="center">
       <strong>Admin Paneli - Dashboard</strong><br/>
-      <img src="public/admin_dashboard.png" alt="Admin Dashboard" width="400"/>
+      <img src="frontend/public/admin_dashboard.png" alt="Admin Dashboard" width="400"/>
     </td>
     <td align="center">
       <strong>Admin Paneli - Kitap Yönetimi</strong><br/>
-      <img src="public/admin_books.png" alt="Admin Kitap Yönetimi" width="400"/>
+      <img src="frontend/public/admin_books.png" alt="Admin Kitap Yönetimi" width="400"/>
     </td>
   </tr>
 </table>
@@ -69,7 +70,7 @@ docs/       ER diyagramı, MySQL şeması, mimari notlar
 - Veritabanı mimarisi ve ER diyagramı: [docs/ER-DIYAGRAMI.md](docs/ER-DIYAGRAMI.md)
 - Kod mimarisi, SOLID ve tasarım desenleri: [docs/MIMARI.md](docs/MIMARI.md)
 
-> **Geçiş durumu:** Backend (Laravel) REST API'si tamamlandı. Frontend şu an eski Next.js/Prisma API'sini kullanıyor; Laravel API'sine bağlanması bir sonraki aşamalardadır.
+Frontend'in kendi sunucu tarafı (API route'ları) yoktur; tüm veri Laravel API'sinden gelir. API adresi `frontend/.env.local` içindeki `NEXT_PUBLIC_API_URL` ile verilir.
 
 ## Backend Kurulumu (Laravel + MySQL)
 
@@ -147,10 +148,19 @@ Tüm uçlar `/api` altındadır. Kimlik gerektiren isteklerde `Authorization: Be
 
 **Sipariş kuralları (backend'de):** fiyat ve toplam sunucuda veritabanı fiyatlarından hesaplanır; 500 TL üzeri kargo ücretsizdir, altında 29,90 TL'dir. Stok kontrolü ve düşümü tek transaction içindedir.
 
-## Frontend Kurulumu (geçici)
+## Frontend Kurulumu (React / Next.js)
+
+Backend'in `http://localhost:8000` adresinde çalıştığından emin olun (`php artisan serve`).
 
 ```bash
 cd frontend
 npm install
-npm run dev                   # http://localhost:3000
+cp .env.local.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:8000/api
+npm run dev                        # http://localhost:3000
 ```
+
+Uygulama açıldığında vitrin kitapları API'den gelir. Yönetici olarak giriş yapıp (`admin@bookflow.com`) yönetim panelinden kitap, kullanıcı, sipariş, rapor ve işlem kayıtlarına erişebilirsiniz.
+
+### Sunum / demo modu
+
+Yönetici girişi yapılmışken `Cmd/Ctrl + Shift + P` sunum (altın) verisini, `Cmd/Ctrl + Shift + D` demo (kirli) verisini yükler. Aynı işlem yönetim panelindeki **Ayarlar** sayfasından da yapılabilir. Kitap kataloğu ve örnek siparişler sıfırlanır; kullanıcı hesapları ve işlem kayıtları korunur. Canlı ortamda `DEMO_RESET_ENABLED=false` yapılarak kapatılabilir.

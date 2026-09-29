@@ -7,7 +7,8 @@ import KitapYonetimi from './KitapYonetimi'
 import KullaniciYonetimi from './KullaniciYonetimi'
 import AdminOrders from './AdminOrders'
 import AdminRaporlar from './AdminRaporlar'
-import AdminGelirGider from './AdminGelirGider'
+import AdminGelir from './AdminGelir'
+import AdminIslemKayitlari from './AdminIslemKayitlari'
 import AdminSettings from './AdminSettings'
 import { useApp } from '@/lib/store'
 
@@ -21,7 +22,8 @@ export default function AdminLayout() {
       case 'kullanici-yonetimi': return <KullaniciYonetimi />
       case 'siparisler': return <AdminOrders />
       case 'raporlar': return <AdminRaporlar />
-      case 'gelir-gider': return <AdminGelirGider />
+      case 'gelir': return <AdminGelir />
+      case 'islem-kayitlari': return <AdminIslemKayitlari />
       case 'ayarlar': return <AdminSettings />
       default: return <AdminDashboard />
     }

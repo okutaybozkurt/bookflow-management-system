@@ -2,23 +2,31 @@
 
 import {
   LayoutDashboard, BookCopy, ShoppingBag, BarChart2,
-  TrendingUp, Settings, LogOut, BookOpen, Users
+  TrendingUp, Settings, LogOut, BookOpen, Users, ClipboardList
 } from 'lucide-react'
 import { useApp } from '@/lib/store'
 import { cn } from '@/lib/utils'
+import { DEMO_CONFIRM, runDemoReset } from '@/lib/demo'
 
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'kitap-yonetimi', label: 'Kitap Yönetimi', icon: BookCopy },
-  { id: 'kullanici-yonetimi', label: 'Kullanıcı/Personel', icon: Users },
+  { id: 'kullanici-yonetimi', label: 'Kullanıcılar', icon: Users },
   { id: 'siparisler', label: 'Siparişler', icon: ShoppingBag },
-  { id: 'raporlar', label: 'Raporlar', icon: BarChart2 },
-  { id: 'gelir-gider', label: 'Gelir Gider Takibi', icon: TrendingUp },
+  { id: 'raporlar', label: 'Satış Raporları', icon: BarChart2 },
+  { id: 'gelir', label: 'Gelir Raporu', icon: TrendingUp },
+  { id: 'islem-kayitlari', label: 'İşlem Kayıtları', icon: ClipboardList },
   { id: 'ayarlar', label: 'Ayarlar', icon: Settings },
 ]
 
 export default function AdminSidebar() {
-  const { adminPage, setAdminPage, logout } = useApp()
+  const { adminPage, setAdminPage, logout, addToast } = useApp()
+
+  const reset = async (mode: 'golden' | 'junk') => {
+    if (confirm(DEMO_CONFIRM[mode]) && (await runDemoReset(mode, addToast))) {
+      setTimeout(() => window.location.reload(), 800)
+    }
+  }
 
   return (
     <aside className="w-60 bg-sidebar text-sidebar-foreground flex flex-col min-h-screen">
@@ -62,14 +70,14 @@ export default function AdminSidebar() {
       <div className="px-3 py-4 space-y-2 border-t border-sidebar-border bg-black/20">
         <p className="text-[9px] font-bold text-sidebar-foreground/30 uppercase tracking-widest px-3 mb-2">Sunum Kontrolü</p>
         <button
-          onClick={() => { if(confirm('Demo (Kirli) moda geçilsin mi?')) fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'junk' })}).then(() => window.location.reload()) }}
+          onClick={() => reset('junk')}
           className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-bold text-red-400/70 hover:bg-red-500/10 hover:text-red-400 transition-all border border-red-500/20"
         >
           <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
           DEMO MODU (KIRLI)
         </button>
         <button
-          onClick={() => { if(confirm('Sunum (Altın) moduna geçilsin mi?')) fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'golden' })}).then(() => window.location.reload()) }}
+          onClick={() => reset('golden')}
           className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-bold text-primary/70 hover:bg-primary/10 hover:text-primary transition-all border border-primary/20"
         >
           <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />

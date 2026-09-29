@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, Heart, ShoppingCart, Star, BookOpen, Calendar, Globe, Hash, Layers } from 'lucide-react'
+import { ArrowLeft, Heart, ShoppingCart, Star, Hash, Layers } from 'lucide-react'
 import { useApp } from '@/lib/store'
 import { cn } from '@/lib/utils'
 import BookCard from './BookCard'
+import BookReviews from './BookReviews'
 
 export default function BookDetailPage() {
-  const { selectedBook, books, setCustomerView, addToCart, favoriteIds, toggleFavorite, addToast, userRole } = useApp()
+  const { selectedBook, books, setCustomerView, addToCart, favoriteIds, toggleFavorite, addToast } = useApp()
   const [addedToCart, setAddedToCart] = useState(false)
 
   if (!selectedBook) {
@@ -18,11 +19,10 @@ export default function BookDetailPage() {
 
   const book = selectedBook
   const isFav = favoriteIds.has(book.id)
-  const isLoggedIn = userRole !== 'guest'
   const related = books.filter((b) => b.category === book.category && b.id !== book.id).slice(0, 6)
 
-  const rating = 4.3
-  const reviewCount = 1248
+  const rating = book.averageRating ?? 0
+  const reviewCount = book.reviewsCount
 
   const handleAddToCart = () => {
     addToCart(book)
@@ -32,11 +32,7 @@ export default function BookDetailPage() {
   }
 
   const handleToggleFavorite = () => {
-    toggleFavorite(book.id)
-    addToast(
-      isFav ? 'Favorilerden çıkarıldı.' : 'Favorilere eklendi!',
-      isFav ? 'info' : 'success'
-    )
+    toggleFavorite(book.id) // giriş yoksa giriş penceresi açılır; sonuç bildirimi de store'dadır
   }
 
   return (
@@ -86,7 +82,7 @@ export default function BookDetailPage() {
                 />
               ))}
             </div>
-            <span className="text-sm font-semibold">{rating}</span>
+            <span className="text-sm font-semibold">{reviewCount > 0 ? rating.toFixed(1) : '–'}</span>
             <span className="text-sm text-muted-foreground">({reviewCount.toLocaleString('tr-TR')} yorum)</span>
           </div>
 
@@ -103,10 +99,12 @@ export default function BookDetailPage() {
           {/* Book details grid */}
           <div className="grid grid-cols-2 gap-3 text-sm">
 
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Hash className="w-4 h-4 shrink-0" />
-              <span className="text-xs">{book.isbn}</span>
-            </div>
+            {book.isbn && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Hash className="w-4 h-4 shrink-0" />
+                <span className="text-xs">{book.isbn}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2 text-muted-foreground">
               <Layers className="w-4 h-4 shrink-0" />
               <span className={book.stock > 0 ? 'text-green-600 font-semibold' : 'text-red-500 font-semibold'}>
@@ -133,7 +131,7 @@ export default function BookDetailPage() {
               {addedToCart ? 'Sepete Eklendi!' : book.stock === 0 ? 'Stokta Yok' : 'Sepete Ekle'}
             </button>
 
-            {isLoggedIn && (
+            {(
               <button
                 onClick={handleToggleFavorite}
                 className={cn(
@@ -149,6 +147,8 @@ export default function BookDetailPage() {
           </div>
         </div>
       </div>
+
+      <BookReviews bookId={book.id} />
 
       {/* Related Books */}
       {related.length > 0 && (

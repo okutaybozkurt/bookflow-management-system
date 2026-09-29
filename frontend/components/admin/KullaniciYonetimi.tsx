@@ -1,36 +1,38 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Search, Edit2, Trash2 } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Plus, Search, Edit2, Trash2, Loader2 } from 'lucide-react'
 import { useApp } from '@/lib/store'
+import { ApiError, errorMessage } from '@/lib/api'
+import { usersApi, type ManagedUser } from '@/lib/services'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  role: 'Admin' | 'Personel' | 'Müşteri'
-  registrationDate: string
-}
-
-const mockUsers: User[] = [
-  { id: '1', name: 'Ahmet Yılmaz', email: 'ahmet@bookflow.com', role: 'Admin', registrationDate: '2024-01-15' },
-  { id: '2', name: 'Fatma Kaya', email: 'fatma@bookflow.com', role: 'Personel', registrationDate: '2024-02-20' },
-  { id: '3', name: 'Mehmet Demir', email: 'mehmet@bookflow.com', role: 'Personel', registrationDate: '2024-03-10' },
-  { id: '4', name: 'Zeynep Şimşek', email: 'zeynep@bookflow.com', role: 'Müşteri', registrationDate: '2024-04-05' },
-]
+type Role = 'customer' | 'admin'
+const ROLE_LABEL: Record<Role, string> = { admin: 'Yönetici', customer: 'Müşteri' }
+const EMPTY_FORM = { name: '', email: '', role: 'customer' as Role, password: '' }
 
 export default function KullaniciYonetimi() {
-  const { addToast } = useApp()
-  const [users, setUsers] = useState<User[]>(mockUsers)
+  const { addToast, userId } = useApp()
+  const [users, setUsers] = useState<ManagedUser[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [editingUser, setEditingUser] = useState<ManagedUser | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<ManagedUser | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    role: 'Müşteri' as 'Admin' | 'Personel' | 'Müşteri',
-  })
+  const [formError, setFormError] = useState<string | null>(null)
+  const [form, setForm] = useState(EMPTY_FORM)
+
+  const load = useCallback(async () => {
+    try {
+      setUsers(await usersApi.list())
+    } catch (error) {
+      addToast(errorMessage(error, 'Kullanıcılar yüklenemedi.'), 'error')
+    } finally {
+      setLoading(false)
+    }
+  }, [addToast])
+
+  useEffect(() => { load() }, [load])
 
   const filteredUsers = users.filter(
     (user) =>
@@ -38,64 +40,68 @@ export default function KullaniciYonetimi() {
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setFormError(null)
 
-    if (!form.name || !form.email) {
-      addToast('Lütfen tüm alanları doldurun', 'error')
+    if (!form.name || !form.email || (!editingUser && !form.password)) {
+      setFormError('Lütfen zorunlu alanları doldurun.')
       return
     }
 
-    if (editingUser) {
-      // Update existing
-      setUsers(
-        users.map((u) =>
-          u.id === editingUser.id
-            ? { ...u, name: form.name, email: form.email, role: form.role }
-            : u
-        )
-      )
-      addToast('Kullanıcı başarıyla güncellendi', 'success')
-    } else {
-      // Add new
-      const newUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: form.name,
-        email: form.email,
-        role: form.role,
-        registrationDate: new Date().toISOString().split('T')[0],
+    setSaving(true)
+    try {
+      if (editingUser) {
+        await usersApi.update(editingUser.id, {
+          name: form.name, email: form.email, role: form.role,
+          ...(form.password ? { password: form.password } : {}),
+        })
+        addToast('Kullanıcı başarıyla güncellendi', 'success')
+      } else {
+        await usersApi.create({ ...form })
+        addToast('Yeni kullanıcı başarıyla eklendi', 'success')
       }
-      setUsers([...users, newUser])
-      addToast('Yeni kullanıcı başarıyla eklendi', 'success')
+      closeModal()
+      await load()
+    } catch (error) {
+      // Doğrulama hataları (ör. e-posta zaten kayıtlı) formda gösterilir.
+      setFormError(error instanceof ApiError ? error.message : errorMessage(error))
+    } finally {
+      setSaving(false)
     }
-
-    setForm({ name: '', email: '', role: 'Müşteri' })
-    setEditingUser(null)
-    setShowAddModal(false)
   }
 
-  const handleEdit = (user: User) => {
+  const handleEdit = (user: ManagedUser) => {
     setEditingUser(user)
-    setForm({ name: user.name, email: user.email, role: user.role })
+    setForm({ name: user.name, email: user.email, role: user.role, password: '' })
+    setFormError(null)
     setShowAddModal(true)
   }
 
-  const handleDelete = (userId: string) => {
-    setUsers(users.filter((u) => u.id !== userId))
-    setDeleteConfirm(null)
-    addToast('Kullanıcı başarıyla silindi', 'success')
+  const handleDelete = async (user: ManagedUser) => {
+    try {
+      await usersApi.remove(user.id)
+      addToast('Kullanıcı başarıyla silindi', 'success')
+      await load()
+    } catch (error) {
+      addToast(errorMessage(error, 'Kullanıcı silinemedi.'), 'error')
+    } finally {
+      setDeleteConfirm(null)
+    }
   }
 
   const openNewUserModal = () => {
     setEditingUser(null)
-    setForm({ name: '', email: '', role: 'Müşteri' })
+    setForm(EMPTY_FORM)
+    setFormError(null)
     setShowAddModal(true)
   }
 
   const closeModal = () => {
     setShowAddModal(false)
     setEditingUser(null)
-    setForm({ name: '', email: '', role: 'Müşteri' })
+    setForm(EMPTY_FORM)
+    setFormError(null)
   }
 
   return (
@@ -103,8 +109,10 @@ export default function KullaniciYonetimi() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Kullanıcı/Personel Yönetimi</h1>
-          <p className="text-sm text-muted-foreground">{users.length} kullanıcı listeleniyor</p>
+          <h1 className="text-xl font-bold text-foreground">Kullanıcı Yönetimi</h1>
+          <p className="text-sm text-muted-foreground">
+            {loading ? 'Yükleniyor...' : `${users.length} kullanıcı listeleniyor`}
+          </p>
         </div>
         <button
           onClick={openNewUserModal}
@@ -136,10 +144,14 @@ export default function KullaniciYonetimi() {
               <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Email</th>
               <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Rol</th>
               <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden sm:table-cell">Kayıt Tarihi</th>
+              <th className="text-right text-xs font-semibold text-muted-foreground px-4 py-3 hidden md:table-cell">Sipariş</th>
               <th className="text-center text-xs font-semibold text-muted-foreground px-4 py-3">İşlem</th>
             </tr>
           </thead>
           <tbody>
+            {!loading && filteredUsers.length === 0 && (
+              <tr><td colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">Kullanıcı bulunamadı.</td></tr>
+            )}
             {filteredUsers.map((user) => (
               <tr key={user.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                 <td className="px-4 py-3">
@@ -151,17 +163,14 @@ export default function KullaniciYonetimi() {
                 <td className="px-4 py-3">
                   <span
                     className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      user.role === 'Admin'
-                        ? 'bg-red-100 text-red-700'
-                        : user.role === 'Personel'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-green-100 text-green-700'
+                      user.role === 'admin' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
                     }`}
                   >
-                    {user.role}
+                    {ROLE_LABEL[user.role]}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">{user.registrationDate}</td>
+                <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">{user.createdAt.slice(0, 10)}</td>
+                <td className="px-4 py-3 text-sm text-muted-foreground text-right hidden md:table-cell">{user.ordersCount}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-center gap-1">
                     <button
@@ -171,8 +180,10 @@ export default function KullaniciYonetimi() {
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => setDeleteConfirm(user.id)}
-                      className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-red-50 text-red-500 transition-colors"
+                      onClick={() => setDeleteConfirm(user)}
+                      disabled={user.id === userId}
+                      title={user.id === userId ? 'Kendi hesabınızı silemezsiniz' : 'Sil'}
+                      className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-red-50 text-red-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -200,7 +211,10 @@ export default function KullaniciYonetimi() {
               </button>
             </div>
 
-            <form onSubmit={handleAddUser} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {formError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">{formError}</div>
+              )}
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Ad Soyad</label>
                 <input
@@ -227,20 +241,35 @@ export default function KullaniciYonetimi() {
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Rol</label>
                 <select
                   value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value as any })}
-                  className="w-full px-3 py-2.5 border border-border rounded-lg text-sm outline-none focus:border-primary bg-white"
+                  onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
+                  disabled={editingUser?.id === userId}
+                  className="w-full px-3 py-2.5 border border-border rounded-lg text-sm outline-none focus:border-primary bg-white disabled:opacity-60"
                 >
-                  <option>Admin</option>
-                  <option>Personel</option>
-                  <option>Müşteri</option>
+                  <option value="customer">Müşteri</option>
+                  <option value="admin">Yönetici</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Şifre {editingUser && <span className="font-normal text-muted-foreground">(değiştirmek istemiyorsanız boş bırakın)</span>}
+                </label>
+                <input
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="En az 8 karakter, harf ve rakam"
+                  className="w-full px-3 py-2.5 border border-border rounded-lg text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+                />
               </div>
 
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 bg-primary hover:bg-primary/90 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
+                  disabled={saving}
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white font-medium py-2.5 rounded-lg transition-colors text-sm disabled:opacity-60 flex items-center justify-center gap-2"
                 >
+                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   {editingUser ? 'Güncelle' : 'Ekle'}
                 </button>
                 <button
@@ -262,7 +291,9 @@ export default function KullaniciYonetimi() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4">
             <div className="p-6 space-y-4">
               <h2 className="text-lg font-bold text-foreground">Emin misiniz?</h2>
-              <p className="text-sm text-muted-foreground">Bu kullanıcı silinecektir. Bu işlem geri alınamaz.</p>
+              <p className="text-sm text-muted-foreground">
+                <strong>{deleteConfirm.name}</strong> silinecek ve hesabına artık giriş yapılamayacak. Geçmiş siparişleri korunur.
+              </p>
 
               <div className="flex items-center gap-3 pt-2">
                 <button

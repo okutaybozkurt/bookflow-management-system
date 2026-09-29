@@ -1,7 +1,9 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react'
-import { UserRole, CustomerView, AdminPage, Book, Category, CartItem, Order, Toast } from './store/types'
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
+import { UserRole, CustomerView, AdminPage, AuthUser, Author, Book, Category, CartItem, Order, Toast } from './store/types'
+import { UNAUTHORIZED_EVENT } from './api'
+import { authApi } from './services'
 import { useAuth } from './store/hooks/useAuth'
 import { useData } from './store/hooks/useData'
 import { useCart } from './store/hooks/useCart'
@@ -9,11 +11,16 @@ import { useCart } from './store/hooks/useCart'
 interface AppContextType {
   // Auth
   userRole: UserRole
+  userId: string
   userEmail: string
   userName: string
-  userId: string
-  login: (role: UserRole, email: string, name?: string, id?: string) => void
-  logout: () => void
+  userPhone: string
+  userAddress: string
+  authReady: boolean
+  signIn: (email: string, password: string) => Promise<AuthUser>
+  signUp: (input: { name: string; email: string; password: string }) => Promise<AuthUser>
+  logout: () => Promise<void>
+  updateProfile: (input: Parameters<typeof authApi.updateProfile>[0]) => Promise<AuthUser>
 
   // Navigation
   customerView: CustomerView
@@ -23,32 +30,31 @@ interface AppContextType {
   isAdminView: boolean
   setIsAdminView: (v: boolean) => void
 
-  // Data
+  // Katalog (vitrin: yalnızca aktif kitaplar; adminBooks: yönetici için tümü)
   books: Book[]
+  adminBooks: Book[]
   categories: Category[]
-  metrics: {
-    toplamKitap: number
-    toplamGelir: number
-    toplamStok: number
-  }
-  monthlyRevenue: any[]
-  yearlyRevenue: any[]
+  authors: Author[]
+  catalogLoading: boolean
+  catalogError: string | null
+  refreshCatalog: () => Promise<void>
+  selectedBook: Book | null
+  openBook: (book: Book) => void
+
+  // Sepet, favori, sipariş
   cartItems: CartItem[]
   favoriteIds: Set<string>
+  orders: Order[]
   addToCart: (book: Book) => void
   removeFromCart: (bookId: string) => void
   updateCartQty: (bookId: string, quantity: number) => void
   toggleFavorite: (bookId: string) => void
-  removeToast: (id: string) => void
-  openBook: (book: Book) => void
-  selectedBook: Book | null
-
-  orders: Order[]
-  setOrders: (orders: Order[]) => void
-  createOrder: () => void
+  createOrder: (shippingAddress: string) => Promise<void>
+  cancelOrder: (order: Order) => Promise<void>
 
   // UI
   addToast: (message: string, type: 'success' | 'error' | 'info') => void
+  removeToast: (id: string) => void
   toasts: Toast[]
   isAuthModalOpen: boolean
   setAuthModalOpen: (open: boolean) => void
@@ -78,25 +84,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // --- Domain Hooks (SOLID: SRP) ---
   const auth = useAuth()
-  const data = useData()
-  const cart = useCart(
-    auth.userRole, 
-    auth.userName, 
-    auth.userEmail, 
-    auth.userId,
-    addToast, 
-    setAuthModalOpen, 
-    data.setBooks, 
-    setCustomerView
-  )
+  const data = useData(auth.userRole, auth.authReady)
+  const cart = useCart(auth.user, addToast, setAuthModalOpen, data.refreshCatalog, setCustomerView)
 
-  // --- Auth Wrapper with Redirect Logic ---
-  const login = (role: UserRole, email: string, name?: string, id?: string) => {
-    auth.login(role, email, name, id, () => {
-      if (role !== 'admin' && cart.cartItems.length > 0) {
-        setCustomerView('cart')
-      }
-    })
+  // Oturum düşerse (token süresi doldu) kullanıcı bilgilendirilir.
+  useEffect(() => {
+    const onUnauthorized = () => {
+      addToast('Oturumunuz sona erdi, lütfen tekrar giriş yapın.', 'info')
+      setCustomerView('home')
+    }
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+  }, [addToast])
+
+  // Giriş sonrası sepet doluysa doğrudan sepete yönlendir.
+  const signIn = async (email: string, password: string) => {
+    const me = await auth.signIn(email, password)
+    if (me.role !== 'admin' && cart.cartItems.length > 0) setCustomerView('cart')
+    return me
   }
 
   const openBook = (book: Book) => {
@@ -104,19 +109,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCustomerView('book-detail')
   }
 
-  const logout = () => {
-    auth.logout()
+  const logout = async () => {
+    await auth.signOut()
     setCustomerView('home')
   }
 
   return (
     <AppContext.Provider
       value={{
-        ...auth,
+        userRole: auth.userRole, userId: auth.userId, userEmail: auth.userEmail, userName: auth.userName,
+        userPhone: auth.userPhone, userAddress: auth.userAddress, authReady: auth.authReady,
+        signIn, signUp: auth.signUp, logout, updateProfile: auth.updateProfile,
+        isAdminView: auth.isAdminView, setIsAdminView: auth.setIsAdminView,
         ...data,
         ...cart,
-        login,
-        logout,
         customerView, setCustomerView, adminPage, setAdminPage,
         isAuthModalOpen, setAuthModalOpen,
         toasts, addToast, removeToast,
@@ -124,18 +130,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-      <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2">
-        {toasts.map((t) => (
-          <div
-            key={t.id}
-            className={`px-4 py-2 rounded-lg shadow-lg text-white text-sm font-medium animate-in slide-in-from-right-full ${
-              t.type === 'success' ? 'bg-green-500' : t.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-            }`}
-          >
-            {t.message}
-          </div>
-        ))}
-      </div>
     </AppContext.Provider>
   )
 }

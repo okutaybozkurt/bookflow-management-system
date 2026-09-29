@@ -1,65 +1,49 @@
-import { useState, useEffect } from 'react'
-import { Book, Category } from '../types'
+import { useCallback, useEffect, useState } from 'react'
+import { errorMessage } from '../../api'
+import { authorsApi, booksApi, categoriesApi } from '../../services'
+import type { Author, Book, Category, UserRole } from '../types'
 
-export function useData() {
+/**
+ * Katalog verisi (kitap, kategori, yazar). Vitrin yalnızca aktif kitapları gösterir;
+ * yönetici ayrıca pasif kitapları içeren `adminBooks` listesini alır.
+ */
+export function useData(userRole: UserRole, authReady: boolean) {
   const [books, setBooks] = useState<Book[]>([])
+  const [adminBooks, setAdminBooks] = useState<Book[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [authors, setAuthors] = useState<Author[]>([])
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
-  const [monthlyRevenue, setMonthlyRevenue] = useState<any[]>([])
-  const [yearlyRevenue, setYearlyRevenue] = useState<any[]>([])
+  const [catalogLoading, setCatalogLoading] = useState(true)
+  const [catalogError, setCatalogError] = useState<string | null>(null)
 
-  const metrics = {
-    toplamKitap: books.length,
-    toplamGelir: books.reduce((acc, b) => acc + (b.price * b.sold), 0),
-    toplamStok: books.reduce((acc, b) => acc + b.stock, 0),
-  }
+  const refreshCatalog = useCallback(async () => {
+    try {
+      const [pub, cats, auths, all] = await Promise.all([
+        booksApi.listPublic(),
+        categoriesApi.list(),
+        authorsApi.list(),
+        userRole === 'admin' ? booksApi.listAdmin() : Promise.resolve([] as Book[]),
+      ])
+      setBooks(pub)
+      setCategories(cats)
+      setAuthors(auths)
+      setAdminBooks(all)
+      // Detay sayfasındaki kitap güncel veriyle eşitlenir.
+      setSelectedBook((prev) => (prev ? pub.find((b) => b.id === prev.id) ?? prev : prev))
+      setCatalogError(null)
+    } catch (error) {
+      setCatalogError(errorMessage(error, 'Kitaplar yüklenemedi.'))
+    } finally {
+      setCatalogLoading(false)
+    }
+  }, [userRole])
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [booksRes, catsRes] = await Promise.all([
-          fetch('/api/books'),
-          fetch('/api/categories')
-        ])
-        if (booksRes.ok) {
-          const booksData = await booksRes.json()
-          setBooks(booksData)
-          
-          const isJunk = booksData.some((b: any) => b.title.includes('ASDASD'))
-          if (isJunk) {
-            setMonthlyRevenue([
-              { month: 'Oca', gelir: 9999, gider: 111 },
-              { month: 'Şub', gelir: 111, gider: 9999 },
-              { month: 'Mar', gelir: 999, gider: 999 },
-              { month: 'Nis', gelir: 555, gider: 555 },
-            ])
-            setYearlyRevenue([
-              { year: '2023', gelir: 99999, gider: 0 },
-              { year: '2024', gelir: 1111, gider: 99999 },
-            ])
-          } else {
-            setMonthlyRevenue([
-              { month: 'Oca', gelir: 4500, gider: 2100 },
-              { month: 'Şub', gelir: 5200, gider: 2800 },
-              { month: 'Mar', gelir: 4800, gider: 2400 },
-              { month: 'Nis', gelir: 6100, gider: 3100 },
-            ])
-            setYearlyRevenue([
-              { year: '2023', gelir: 45000, gider: 22000 },
-              { year: '2024', gelir: 52000, gider: 28000 },
-            ])
-          }
-        }
-        if (catsRes.ok) setCategories(await catsRes.json())
-      } catch (error) {
-        console.error('Fetch error:', error)
-      }
-    }
-    fetchData()
-  }, [])
+    if (authReady) refreshCatalog()
+  }, [authReady, refreshCatalog])
 
   return {
-    books, setBooks, categories, setCategories, selectedBook, setSelectedBook,
-    metrics, monthlyRevenue, yearlyRevenue
+    books, adminBooks, categories, authors, selectedBook, setSelectedBook,
+    catalogLoading, catalogError, refreshCatalog,
   }
 }
