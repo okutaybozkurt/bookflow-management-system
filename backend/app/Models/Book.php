@@ -59,6 +59,42 @@ class Book extends Model
         return $query->where('is_active', true);
     }
 
+    /** Liste filtreleri: arama, kategori, yazar, fiyat aralığı, stok ve sıralama. */
+    public function scopeFilter(Builder $query, array $f): Builder
+    {
+        return $query
+            ->when($f['search'] ?? null, function (Builder $q, string $term) {
+                $q->where(fn (Builder $w) => $w
+                    ->where('title', 'like', "%{$term}%")
+                    ->orWhere('isbn', 'like', "%{$term}%")
+                    ->orWhereHas('author', fn (Builder $a) => $a->where('name', 'like', "%{$term}%")));
+            })
+            ->when($f['category_id'] ?? null, fn (Builder $q, $id) => $q->where('category_id', $id))
+            ->when($f['author_id'] ?? null, fn (Builder $q, $id) => $q->where('author_id', $id))
+            ->when($f['min_price'] ?? null, fn (Builder $q, $v) => $q->where('price', '>=', $v))
+            ->when($f['max_price'] ?? null, fn (Builder $q, $v) => $q->where('price', '<=', $v))
+            ->when($f['in_stock'] ?? null, fn (Builder $q) => $q->where('stock', '>', 0))
+            ->when(isset($f['is_active']), fn (Builder $q) => $q->where('is_active', (bool) $f['is_active']))
+            ->tap(fn (Builder $q) => match ($f['sort'] ?? 'newest') {
+                'price_asc' => $q->orderBy('price'),
+                'price_desc' => $q->orderByDesc('price'),
+                'title' => $q->orderBy('title'),
+                'popular' => $q->orderByDesc('sold_count'),
+                default => $q->latest('id'),
+            });
+    }
+
+    /** Satış adedi ve yorum istatistikleri (iptal edilen siparişler sayılmaz). */
+    public function scopeWithStats(Builder $query): Builder
+    {
+        return $query
+            ->withSum(['orderItems as sold_count' => fn (Builder $q) => $q->whereHas(
+                'order', fn (Builder $o) => $o->where('status', '!=', 'cancelled')
+            )], 'quantity')
+            ->withAvg('reviews as average_rating', 'rating')
+            ->withCount('reviews');
+    }
+
     public function scopeLowStock(Builder $query, int $threshold = 5): Builder
     {
         return $query->where('stock', '<=', $threshold);

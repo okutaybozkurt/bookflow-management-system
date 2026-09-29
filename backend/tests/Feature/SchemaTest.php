@@ -96,8 +96,9 @@ class SchemaTest extends TestCase
         ]);
 
         $this->assertCount(1, $user->favoriteBooks);
-        $this->assertSame(['title' => $book->title], ActivityLog::first()->properties);
-        $this->assertSame($user->id, ActivityLog::first()->user->id);
+        $log = ActivityLog::where('description', 'Kitap eklendi')->first();
+        $this->assertSame(['title' => $book->title], $log->properties);
+        $this->assertSame($user->id, $log->user->id);
     }
 
     public function test_order_status_transitions(): void

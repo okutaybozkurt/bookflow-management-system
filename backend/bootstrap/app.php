@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserIsAdmin;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -26,6 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Tüm hatalar tek formatta: { "message": "..." } (+ doğrulamada "errors").
         $exceptions->render(fn (AuthenticationException $e, Request $r) => response()->json(
             ['message' => 'Oturum açmanız gerekiyor.'], 401));
+
+        $exceptions->render(fn (AuthorizationException $e, Request $r) => response()->json(
+            ['message' => 'Bu işlem için yetkiniz yok.'], 403));
 
         $exceptions->render(fn (ModelNotFoundException|NotFoundHttpException $e, Request $r) => response()->json(
             ['message' => 'Kayıt bulunamadı.'], 404));
