@@ -80,7 +80,7 @@ composer install
 cp .env.example .env          # DB_USERNAME / DB_PASSWORD değerlerini düzenleyin
 php artisan key:generate
 php artisan migrate --seed   # tablolar + 2 hesap + başlangıç kitap kataloğu
-php artisan storage:link      # kitap kapak görselleri için
+php artisan storage:link      # kitap kapak görselleri için (kapaklar database/seeders/covers içinde, internet gerekmez)
 php artisan test              # testleri çalıştırır
 php artisan serve             # http://localhost:8000
 ```

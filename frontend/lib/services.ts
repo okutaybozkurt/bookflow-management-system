@@ -12,7 +12,7 @@ interface Paginated<T> {
   meta: { current_page: number; last_page: number; total: number }
 }
 
-const PLACEHOLDER_COVER = 'https://placehold.co/400x600/e5e7eb/6b7280?text=Kapak'
+const PLACEHOLDER_COVER = '/placeholder.jpg'
 
 /** Sayfalı bir listenin tüm sayfalarını çeker. */
 async function fetchAllPages<T>(path: string, query: Record<string, string | number | boolean> = {}): Promise<T[]> {

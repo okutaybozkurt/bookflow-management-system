@@ -1,12 +1,7 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+// Inter yazı tipi npm paketiyle projeyle birlikte gelir; internet gerekmez.
+import '@fontsource-variable/inter'
 import './globals.css'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: 'KitapÜssü - Türkiye\'nin Kitap Mağazası',
@@ -21,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr" className="bg-background">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`font-sans antialiased`}>
         {children}
       </body>
     </html>
