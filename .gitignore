@@ -13,8 +13,8 @@ build/
 *.db-journal
 
 # Prisma
-/prisma/migrations/
-/lib/generated/prisma
+/frontend/prisma/migrations/
+/frontend/lib/generated/prisma
 
 # OS files
 .DS_Store

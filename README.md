@@ -56,31 +56,41 @@ Aşağıdaki tabloda projenin farklı modlarına ve panellerine ait ekran görü
   </tr>
 </table>
 
-## Kurulum ve Çalıştırma
+## Mimari
 
-Projeyi kendi ortamınızda çalıştırmak için aşağıdaki adımları izleyebilirsiniz:
+Proje, birbirinden bağımsız iki uygulamadan oluşur ve yalnızca HTTP/JSON (REST API) üzerinden haberleşir:
 
-1. **Projeyi Klonlayın:**
-   ```bash
-   git clone https://github.com/okutaybozkurt/bookflow-management-system.git
-   ```
+```
+backend/    Laravel 13 REST API  (PHP 8.3+, MySQL, Laravel Sanctum)
+frontend/   React (Next.js) arayüzü
+docs/       ER diyagramı, MySQL şeması, mimari notlar
+```
 
-2. **Bağımlılıkları Yükleyin:**
-   ```bash
-   npm install
-   ```
+- Veritabanı mimarisi ve ER diyagramı: [docs/ER-DIYAGRAMI.md](docs/ER-DIYAGRAMI.md)
+- Kod mimarisi, SOLID ve tasarım desenleri: [docs/MIMARI.md](docs/MIMARI.md)
 
-3. **Veritabanı Yapılandırması:**
-   `.env` dosyasındaki `DATABASE_URL` bilgisini yerel MySQL veritabanı ayarlarınıza göre güncelleyin.
+> **Geçiş durumu:** Backend (Laravel) veri modeli tamamlandı. Frontend şu an eski Next.js/Prisma API'sini kullanıyor; Laravel API'sine bağlanması bir sonraki aşamalardadır.
 
-4. **Veritabanını Hazırlayın:**
-   ```bash
-   npx prisma db push
-   ```
+## Backend Kurulumu (Laravel + MySQL)
 
-5. **Uygulamayı Başlatın:**
-   ```bash
-   npm run dev
-   ```
+Gereksinimler: PHP 8.3+, Composer, MySQL 8 (macOS: `brew install php composer mysql`).
 
-Tarayıcınızdan [http://localhost:3000](http://localhost:3000) adresine giderek sistemi kullanmaya başlayabilirsiniz.
+```bash
+mysql -u root -p -e "CREATE DATABASE bookflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+cd backend
+composer install
+cp .env.example .env          # DB_USERNAME / DB_PASSWORD değerlerini düzenleyin
+php artisan key:generate
+php artisan migrate
+php artisan test              # testleri çalıştırır
+php artisan serve             # http://localhost:8000
+```
+
+## Frontend Kurulumu (geçici)
+
+```bash
+cd frontend
+npm install
+npm run dev                   # http://localhost:3000
+```
