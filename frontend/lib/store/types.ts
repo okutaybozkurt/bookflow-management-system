@@ -1,7 +1,7 @@
 export type UserRole = 'guest' | 'customer' | 'admin'
 export type CustomerView = 'home' | 'categories' | 'cart' | 'favorites' | 'profile' | 'book-detail'
 export type AdminPage =
-  | 'dashboard' | 'kitap-yonetimi' | 'kullanici-yonetimi' | 'siparisler'
+  | 'dashboard' | 'kitap-yonetimi' | 'kategori-yazar' | 'kullanici-yonetimi' | 'siparisler'
   | 'raporlar' | 'gelir' | 'islem-kayitlari' | 'ayarlar'
 
 export interface AuthUser {

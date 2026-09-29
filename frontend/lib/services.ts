@@ -140,6 +140,8 @@ export const categoriesApi = {
     const res = await api<{ data: { id: number; name: string } }>('/admin/categories', { method: 'POST', body: { name } })
     return { id: String(res.data.id), name: res.data.name }
   },
+  update: (id: string, name: string) => api(`/admin/categories/${id}`, { method: 'PUT', body: { name } }),
+  remove: (id: string) => api<void>(`/admin/categories/${id}`, { method: 'DELETE' }),
 }
 
 export const authorsApi = {
@@ -151,6 +153,8 @@ export const authorsApi = {
     const res = await api<{ data: { id: number; name: string } }>('/admin/authors', { method: 'POST', body: { name } })
     return { id: String(res.data.id), name: res.data.name }
   },
+  update: (id: string, name: string) => api(`/admin/authors/${id}`, { method: 'PUT', body: { name } }),
+  remove: (id: string) => api<void>(`/admin/authors/${id}`, { method: 'DELETE' }),
 }
 
 // ---------- Favoriler ----------

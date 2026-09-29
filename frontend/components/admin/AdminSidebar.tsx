@@ -2,7 +2,7 @@
 
 import {
   LayoutDashboard, BookCopy, ShoppingBag, BarChart2,
-  TrendingUp, Settings, LogOut, BookOpen, Users, ClipboardList
+  TrendingUp, Settings, LogOut, BookOpen, Users, ClipboardList, Tags
 } from 'lucide-react'
 import { useApp } from '@/lib/store'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'kitap-yonetimi', label: 'Kitap Yönetimi', icon: BookCopy },
+  { id: 'kategori-yazar', label: 'Kategori ve Yazarlar', icon: Tags },
   { id: 'kullanici-yonetimi', label: 'Kullanıcılar', icon: Users },
   { id: 'siparisler', label: 'Siparişler', icon: ShoppingBag },
   { id: 'raporlar', label: 'Satış Raporları', icon: BarChart2 },

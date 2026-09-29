@@ -4,6 +4,7 @@ import AdminSidebar from './AdminSidebar'
 import AdminHeader from './AdminHeader'
 import AdminDashboard from './AdminDashboard'
 import KitapYonetimi from './KitapYonetimi'
+import KategoriYazar from './KategoriYazar'
 import KullaniciYonetimi from './KullaniciYonetimi'
 import AdminOrders from './AdminOrders'
 import AdminRaporlar from './AdminRaporlar'
@@ -19,6 +20,7 @@ export default function AdminLayout() {
     switch (adminPage) {
       case 'dashboard': return <AdminDashboard />
       case 'kitap-yonetimi': return <KitapYonetimi />
+      case 'kategori-yazar': return <KategoriYazar />
       case 'kullanici-yonetimi': return <KullaniciYonetimi />
       case 'siparisler': return <AdminOrders />
       case 'raporlar': return <AdminRaporlar />
