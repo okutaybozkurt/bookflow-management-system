@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
@@ -34,9 +34,7 @@ class AuthService
 
         // Kullanıcı yok / şifre yanlış aynı mesajı döner (hesap varlığı sızmasın).
         if (! $user || ! Hash::check($password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['E-posta veya şifre hatalı.'],
-            ]);
+            throw new AuthenticationException('E-posta veya şifre hatalı.');
         }
 
         $this->logger->log('login', 'Kullanıcı giriş yaptı', $user, userId: $user->id);

@@ -83,7 +83,8 @@ export async function api<T = unknown>(path: string, options: RequestOptions = {
 
   if (!res.ok) {
     // Oturum düştüyse (token süresi doldu / iptal edildi) uygulamayı bilgilendir.
-    if (res.status === 401 && token) {
+    // Giriş denemesindeki 401 (hatalı şifre) oturum düşmesi değildir.
+    if (res.status === 401 && token && !path.startsWith('/auth/login')) {
       tokenStore.clear()
       window.dispatchEvent(new Event(UNAUTHORIZED_EVENT))
     }

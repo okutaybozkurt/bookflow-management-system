@@ -139,7 +139,7 @@ Tüm uçlar `/api` altındadır. Kimlik gerektiren isteklerde `Authorization: Be
 | GET | `/admin/reports/top-books`, `/categories`, `/low-stock` | Çok satanlar, kategori satışları, düşük stok |
 | GET | `/admin/activity-logs` | İşlem kayıtları (`user_id`, `action`, `subject_type`, `from`, `to`) |
 
-**HTTP durum kodları:** `200/201/204` başarı, `401` oturum yok, `403` yetki yok, `404` kayıt yok, `409` iş kuralı ihlali (yetersiz stok, ilişkili kayıt, geçersiz durum geçişi), `422` doğrulama hatası (`errors` alanıyla). Tüm hatalar `{ "message": "..." }` biçimindedir.
+**HTTP durum kodları:** `200/201/204` başarı, `401` oturum yok veya hatalı giriş, `403` yetki yok, `404` kayıt yok, `409` iş kuralı ihlali (yetersiz stok, ilişkili kayıt, geçersiz durum geçişi), `422` doğrulama hatası (`errors` alanıyla). Tüm hatalar `{ "message": "..." }` biçimindedir.
 
 **Sipariş kuralları (backend'de):** fiyat ve toplam sunucuda veritabanı fiyatlarından hesaplanır; 500 TL üzeri kargo ücretsizdir, altında 29,90 TL'dir. Stok kontrolü ve düşümü tek transaction içindedir.
 

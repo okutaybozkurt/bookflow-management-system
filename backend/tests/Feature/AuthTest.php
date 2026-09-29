@@ -58,7 +58,7 @@ class AuthTest extends TestCase
         $wrong = $this->postJson('/api/auth/login', ['email' => 'ali@test.com', 'password' => 'yanlis123']);
         $unknown = $this->postJson('/api/auth/login', ['email' => 'yok@test.com', 'password' => 'yanlis123']);
 
-        $wrong->assertStatus(422)->assertJsonPath('errors.email.0', 'E-posta veya şifre hatalı.');
+        $wrong->assertStatus(401)->assertJson(['message' => 'E-posta veya şifre hatalı.']);
         $this->assertSame($wrong->json(), $unknown->json());
     }
 
@@ -83,7 +83,7 @@ class AuthTest extends TestCase
         User::first()->delete(); // soft delete
 
         $this->postJson('/api/auth/login', ['email' => 'ali@test.com', 'password' => 'Sifre1234'])
-            ->assertStatus(422);
+            ->assertStatus(401);
     }
 
     public function test_admin_middleware_blocks_customers_and_allows_admins(): void

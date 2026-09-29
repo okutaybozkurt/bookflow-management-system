@@ -25,8 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         // Tüm hatalar tek formatta: { "message": "..." } (+ doğrulamada "errors").
+        // Özel mesaj (ör. hatalı şifre) korunur; varsayılan İngilizce mesaj Türkçeleştirilir.
         $exceptions->render(fn (AuthenticationException $e, Request $r) => response()->json(
-            ['message' => 'Oturum açmanız gerekiyor.'], 401));
+            ['message' => $e->getMessage() === 'Unauthenticated.' ? 'Oturum açmanız gerekiyor.' : $e->getMessage()], 401));
 
         $exceptions->render(fn (AuthorizationException $e, Request $r) => response()->json(
             ['message' => 'Bu işlem için yetkiniz yok.'], 403));

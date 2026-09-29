@@ -28,3 +28,6 @@ an
 # Frontend
 *.tsbuildinfo
 .env.local
+
+# Kişisel sunum notları (GitHub'a gönderilmez)
+sunum-notlari/
