@@ -85,6 +85,16 @@ php artisan test              # testleri çalıştırır
 php artisan serve             # http://localhost:8000
 ```
 
+### Swagger (API dokümantasyonu ve deneme arayüzü)
+
+Backend çalışırken tarayıcıdan **http://localhost:8000/api/documentation** adresini açın. 47 uç nokta 12 grupta listelenir; her uç için istek/yanıt örnekleri ve durum kodları görünür, **Try it out** ile doğrudan denenebilir.
+
+1. `POST /auth/login` ucunu açıp **Try it out → Execute** deyin (hazır örnek: `admin@bookflow.com` / `Admin1234`).
+2. Dönen `token` değerini kopyalayıp sağ üstteki **Authorize** düğmesine yapıştırın.
+3. Kilitli (🔒) uçlar artık çalışır; yönetici uçları için admin, müşteri uçları için müşteri hesabı kullanın.
+
+Belge, `backend/app/OpenApi/` altındaki OpenAPI tanımlarından (`darkaonline/l5-swagger`) her istekte otomatik üretilir; ham JSON: `http://localhost:8000/docs?api-docs.json`. Arayüz dosyaları pakettedir, internet gerekmez.
+
 ### Başlangıç hesapları (seeder)
 
 | Rol | E-posta | Şifre |

@@ -22,6 +22,10 @@ Kısa kurulum (iki ayrı terminal):
    cp .env.local.example .env.local
    npm run dev                 (http://localhost:3000)
 
+Swagger (API dokümantasyonu, backend çalışırken):
+   http://localhost:8000/api/documentation
+   POST /auth/login -> token'ı kopyala -> Authorize düğmesine yapıştır
+
 Başlangıç hesapları:
    Yönetici : admin@bookflow.com   / Admin1234
    Müşteri  : musteri@bookflow.com / Musteri1234
