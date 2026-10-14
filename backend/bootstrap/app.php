@@ -9,6 +9,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -24,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['admin' => EnsureUserIsAdmin::class]);
         // API'de giriş sayfasına yönlendirme yok; Accept başlığı olmasa da 401 JSON döner.
         $middleware->redirectGuestsTo(fn () => null);
+        // Yetki kontrolü, kayıt bulma (route model binding) işleminden önce yapılır: müşteri, olmayan bir kaydı 404 ile değil 403 ile görür.
+        $middleware->prependToPriorityList(SubstituteBindings::class, EnsureUserIsAdmin::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
