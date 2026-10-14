@@ -32,7 +32,7 @@ final class AdminEndpoints
         summary: 'Kitap ekle (kapak için multipart/form-data, alan: cover)',
         security: [['bearerAuth' => []]],
         tags: ['Yönetici - Kitaplar'],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['title', 'price', 'stock', 'author_id', 'category_id'], properties: [new OA\Property(property: 'title', type: 'string', example: 'Yeni Kitap'), new OA\Property(property: 'isbn', type: 'string'), new OA\Property(property: 'price', type: 'number', example: 99.9), new OA\Property(property: 'stock', type: 'integer', example: 10), new OA\Property(property: 'author_id', type: 'integer', example: 1), new OA\Property(property: 'category_id', type: 'integer', example: 1), new OA\Property(property: 'description', type: 'string'), new OA\Property(property: 'page_count', type: 'integer'), new OA\Property(property: 'published_year', type: 'integer'), new OA\Property(property: 'language', type: 'string'), new OA\Property(property: 'is_active', type: 'boolean')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['title', 'price', 'stock', 'author_id', 'category_id'], properties: [new OA\Property(property: 'title', type: 'string', example: 'Yeni Kitap'), new OA\Property(property: 'isbn', type: 'string', example: '9781234567897'), new OA\Property(property: 'price', type: 'number', example: 99.9), new OA\Property(property: 'stock', type: 'integer', example: 10), new OA\Property(property: 'author_id', type: 'integer', example: 1), new OA\Property(property: 'category_id', type: 'integer', example: 1), new OA\Property(property: 'description', type: 'string', example: 'Kitap hakkında kısa açıklama'), new OA\Property(property: 'page_count', type: 'integer', example: 200), new OA\Property(property: 'published_year', type: 'integer', example: 2024), new OA\Property(property: 'language', type: 'string', example: 'Türkçe'), new OA\Property(property: 'is_active', type: 'boolean', example: true)])),
         responses: [new OA\Response(response: 201, description: 'Oluşturuldu', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/Book')])), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized'), new OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
     )]
     public function createBook() {}
@@ -43,7 +43,7 @@ final class AdminEndpoints
         security: [['bearerAuth' => []]],
         tags: ['Yönetici - Kitaplar'],
         parameters: [new OA\Parameter(name: 'book', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: [], properties: [new OA\Property(property: 'title', type: 'string'), new OA\Property(property: 'price', type: 'number'), new OA\Property(property: 'stock', type: 'integer'), new OA\Property(property: 'is_active', type: 'boolean')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: [], properties: [new OA\Property(property: 'title', type: 'string', example: 'Güncel Başlık'), new OA\Property(property: 'price', type: 'number', example: 99.9), new OA\Property(property: 'stock', type: 'integer', example: 10), new OA\Property(property: 'is_active', type: 'boolean', example: true)])),
         responses: [new OA\Response(response: 200, description: 'Güncellendi', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/Book')])), new OA\Response(response: 404, ref: '#/components/responses/NotFound'), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized'), new OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
     )]
     public function updateBook() {}
@@ -73,7 +73,7 @@ final class AdminEndpoints
         summary: 'Kategori ekle',
         security: [['bearerAuth' => []]],
         tags: ['Yönetici - Kategori ve Yazarlar'],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name'], properties: [new OA\Property(property: 'name', type: 'string', example: 'Tarih')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name'], properties: [new OA\Property(property: 'name', type: 'string', example: 'Matematik')])),
         responses: [new OA\Response(response: 201, description: 'Oluşturuldu', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/Category')])), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized'), new OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
     )]
     public function createCategory() {}
@@ -84,7 +84,7 @@ final class AdminEndpoints
         security: [['bearerAuth' => []]],
         tags: ['Yönetici - Kategori ve Yazarlar'],
         parameters: [new OA\Parameter(name: 'category', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name'], properties: [new OA\Property(property: 'name', type: 'string')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name'], properties: [new OA\Property(property: 'name', type: 'string', example: 'Ayşe Yılmaz')])),
         responses: [new OA\Response(response: 200, description: 'Güncellendi', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/Category')])), new OA\Response(response: 404, ref: '#/components/responses/NotFound'), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized'), new OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
     )]
     public function updateCategory() {}
@@ -104,7 +104,7 @@ final class AdminEndpoints
         summary: 'Yazar ekle',
         security: [['bearerAuth' => []]],
         tags: ['Yönetici - Kategori ve Yazarlar'],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name'], properties: [new OA\Property(property: 'name', type: 'string', example: 'Yeni Yazar'), new OA\Property(property: 'biography', type: 'string')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name'], properties: [new OA\Property(property: 'name', type: 'string', example: 'Namık Kemal'), new OA\Property(property: 'biography', type: 'string', example: 'Yazar hakkında kısa bilgi')])),
         responses: [new OA\Response(response: 201, description: 'Oluşturuldu', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/Author')])), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized'), new OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
     )]
     public function createAuthor() {}
@@ -115,7 +115,7 @@ final class AdminEndpoints
         security: [['bearerAuth' => []]],
         tags: ['Yönetici - Kategori ve Yazarlar'],
         parameters: [new OA\Parameter(name: 'author', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name'], properties: [new OA\Property(property: 'name', type: 'string'), new OA\Property(property: 'biography', type: 'string')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name'], properties: [new OA\Property(property: 'name', type: 'string', example: 'Ayşe Yılmaz'), new OA\Property(property: 'biography', type: 'string', example: 'Yazar hakkında kısa bilgi')])),
         responses: [new OA\Response(response: 200, description: 'Güncellendi', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/Author')])), new OA\Response(response: 404, ref: '#/components/responses/NotFound'), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized'), new OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
     )]
     public function updateAuthor() {}
@@ -145,7 +145,7 @@ final class AdminEndpoints
         summary: 'Kullanıcı oluştur',
         security: [['bearerAuth' => []]],
         tags: ['Yönetici - Kullanıcılar'],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name', 'email', 'password', 'role'], properties: [new OA\Property(property: 'name', type: 'string'), new OA\Property(property: 'email', type: 'string', example: 'yeni@example.com'), new OA\Property(property: 'password', type: 'string', example: 'Sifre1234'), new OA\Property(property: 'role', type: 'string', example: 'customer')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['name', 'email', 'password', 'role'], properties: [new OA\Property(property: 'name', type: 'string', example: 'Ayşe Yılmaz'), new OA\Property(property: 'email', type: 'string', example: 'yeni@example.com'), new OA\Property(property: 'password', type: 'string', example: 'Sifre1234'), new OA\Property(property: 'role', type: 'string', example: 'customer')])),
         responses: [new OA\Response(response: 201, description: 'Oluşturuldu', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/User')])), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized'), new OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
     )]
     public function createUser() {}
@@ -166,7 +166,7 @@ final class AdminEndpoints
         security: [['bearerAuth' => []]],
         tags: ['Yönetici - Kullanıcılar'],
         parameters: [new OA\Parameter(name: 'user', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: [], properties: [new OA\Property(property: 'name', type: 'string'), new OA\Property(property: 'email', type: 'string'), new OA\Property(property: 'role', type: 'string')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: [], properties: [new OA\Property(property: 'name', type: 'string', example: 'Ayşe Yılmaz'), new OA\Property(property: 'email', type: 'string', example: 'ayse.yilmaz@example.com'), new OA\Property(property: 'role', type: 'string', example: 'customer')])),
         responses: [new OA\Response(response: 200, description: 'Güncellendi', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/User')])), new OA\Response(response: 409, ref: '#/components/responses/Conflict'), new OA\Response(response: 404, ref: '#/components/responses/NotFound'), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized'), new OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
     )]
     public function updateUser() {}

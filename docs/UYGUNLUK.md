@@ -6,7 +6,7 @@ Kaynak: *Web Tabanlı Teknolojiler Dönem Sonu Projesi* dokümanı (59 satır). 
 
 | Katman | Sonuç | Ne doğrular? |
 |---|---|---|
-| PHPUnit (`php artisan test`) | **55 / 55** | İş kuralları, yetki, hata biçimi, soft delete, seeder |
+| PHPUnit (`php artisan test`) | **56 / 56** | İş kuralları, yetki, hata biçimi, soft delete, seeder |
 | API + veritabanı denetimi | **83 / 83** | Gerçek MySQL: CRUD, durum kodları, token, eşzamanlılık, kısıtlar, yeniden başlatınca kalıcılık |
 | Arayüz denetimi (Chromium) | **52 / 52** | Arayüzden yapılan her işlem API'ye gidip veritabanına yazılıyor mu? Hata mesajları gösteriliyor mu? |
 
@@ -50,6 +50,8 @@ Kaynak: *Web Tabanlı Teknolojiler Dönem Sonu Projesi* dokümanı (59 satır). 
 ## Swagger ile API doğrulaması
 
 Hocanın talebi üzerine API'nin tamamı Swagger UI ile belgelendi (`/api/documentation`). Belgedeki 47 işlemin her biri gerçek HTTP ile çağrıldı ve dönen durum kodunun belgede yazılı olduğu doğrulandı; ayrıca Swagger arayüzünden giriş → token → yetkili uç çağrısı denendi. Bu sırada `Accept` başlığı göndermeyen istemcide (curl, Postman) korumalı uçların 401 yerine 500 döndüğü bulunup düzeltildi.
+
+Ek uç durum taraması (bozuk JSON, geçersiz sayfalama, yanlış HTTP metodu, bozuk token, çift işlem, başkasının kaydı, istemciden fiyat gönderme, XSS/SQL metni vb.) yapıldı; tüm yanıtlar tek biçimli, Türkçe ve iç ayrıntı sızdırmayan hatalarla döndü. Bu taramada doğrulama mesajlarının (örn. "must be at least 1") İngilizce çıktığı bulunup Türkçeleştirildi ve Swagger'daki varsayılan örnek istek gövdeleri, Execute'a basınca başarılı sonuç verecek şekilde düzeltildi.
 
 ## Bu kontrol sırasında bulunup düzeltilenler
 

@@ -17,8 +17,8 @@ final class PublicEndpoints
                 new OA\Property(property: 'name', type: 'string', example: 'Ayşe Yılmaz'),
                 new OA\Property(property: 'email', type: 'string', format: 'email', example: 'ayse@example.com'),
                 new OA\Property(property: 'password', type: 'string', example: 'Sifre1234', description: 'En az 8 karakter, harf ve rakam'),
-                new OA\Property(property: 'phone', type: 'string', nullable: true),
-                new OA\Property(property: 'address', type: 'string', nullable: true),
+                new OA\Property(property: 'phone', type: 'string', nullable: true, example: '05551112233'),
+                new OA\Property(property: 'address', type: 'string', nullable: true, example: 'Atatürk Cd. No:1 Kadıköy İstanbul'),
             ]
         )),
         responses: [
@@ -95,7 +95,7 @@ final class PublicEndpoints
             new OA\Property(property: 'address', type: 'string', nullable: true),
             new OA\Property(property: 'current_password', type: 'string', description: 'Şifre değiştirirken zorunlu'),
             new OA\Property(property: 'password', type: 'string'),
-        ])),
+        ], example: ['name' => 'Ayşe Yılmaz', 'phone' => '05551112233', 'address' => 'Atatürk Cd. No:1 Kadıköy İstanbul'])),
         responses: [
             new OA\Response(response: 200, description: 'Güncellendi', content: new OA\JsonContent(properties: [
                 new OA\Property(property: 'data', ref: '#/components/schemas/User'),

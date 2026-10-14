@@ -54,7 +54,7 @@ final class CustomerEndpoints
         security: [['bearerAuth' => []]],
         tags: ['Yorumlar'],
         parameters: [new OA\Parameter(name: 'review', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: [], properties: [new OA\Property(property: 'rating', type: 'integer', example: 4), new OA\Property(property: 'comment', type: 'string')])),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: [], properties: [new OA\Property(property: 'rating', type: 'integer', example: 4), new OA\Property(property: 'comment', type: 'string', example: 'Çok beğendim')])),
         responses: [new OA\Response(response: 200, description: 'Güncellendi', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/Review')])), new OA\Response(response: 403, ref: '#/components/responses/Forbidden'), new OA\Response(response: 422, ref: '#/components/responses/ValidationError'), new OA\Response(response: 404, ref: '#/components/responses/NotFound'), new OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
     )]
     public function updateReview() {}
