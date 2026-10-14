@@ -68,8 +68,8 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
     schema: 'ValidationError',
     properties: [
-        new OA\Property(property: 'message', type: 'string', example: 'E-posta zorunludur.'),
-        new OA\Property(property: 'errors', type: 'object', example: ['email' => ['E-posta zorunludur.']]),
+        new OA\Property(property: 'message', type: 'string', example: 'İlk hata mesajı (örn. Kategori adı zorunludur.)'),
+        new OA\Property(property: 'errors', type: 'object', example: ['alan_adi' => ['Bu alana ait hata mesajı.']]),
     ]
 )]
 #[OA\Schema(

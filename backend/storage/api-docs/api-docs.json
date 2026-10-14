@@ -2653,13 +2653,13 @@
                 "properties": {
                     "message": {
                         "type": "string",
-                        "example": "E-posta zorunludur."
+                        "example": "İlk hata mesajı (örn. Kategori adı zorunludur.)"
                     },
                     "errors": {
                         "type": "object",
                         "example": {
-                            "email": [
-                                "E-posta zorunludur."
+                            "alan_adi": [
+                                "Bu alana ait hata mesajı."
                             ]
                         }
                     }
