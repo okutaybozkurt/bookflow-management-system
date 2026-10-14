@@ -39,6 +39,13 @@ class ErrorFormatTest extends TestCase
         $this->assertCleanError($response, 401);
     }
 
+    public function test_customer_gets_403_on_admin_route_even_for_missing_record(): void
+    {
+        $customer = User::factory()->create();
+
+        $this->actingAs($customer, 'sanctum')->getJson('/api/admin/users/999999')->assertForbidden();
+    }
+
     public function test_unknown_route_and_missing_record_return_404(): void
     {
         $this->assertCleanError($this->getJson('/api/olmayan-adres'), 404, 'Kayıt bulunamadı.');
