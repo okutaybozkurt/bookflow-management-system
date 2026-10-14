@@ -31,6 +31,14 @@ class ErrorFormatTest extends TestCase
         $this->assertCleanError($this->deleteJson('/api/books'), 405, 'Bu adres için bu HTTP metodu desteklenmiyor.');
     }
 
+    public function test_protected_route_without_accept_header_returns_401_json(): void
+    {
+        // Swagger, curl veya Postman gibi istemciler Accept: application/json göndermeyebilir.
+        $response = $this->call('GET', '/api/me');
+
+        $this->assertCleanError($response, 401);
+    }
+
     public function test_unknown_route_and_missing_record_return_404(): void
     {
         $this->assertCleanError($this->getJson('/api/olmayan-adres'), 404, 'Kayıt bulunamadı.');

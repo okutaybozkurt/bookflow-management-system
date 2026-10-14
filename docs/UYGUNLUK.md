@@ -6,7 +6,7 @@ Kaynak: *Web Tabanlı Teknolojiler Dönem Sonu Projesi* dokümanı (59 satır). 
 
 | Katman | Sonuç | Ne doğrular? |
 |---|---|---|
-| PHPUnit (`php artisan test`) | **53 / 53** | İş kuralları, yetki, hata biçimi, soft delete, seeder |
+| PHPUnit (`php artisan test`) | **55 / 55** | İş kuralları, yetki, hata biçimi, soft delete, seeder |
 | API + veritabanı denetimi | **83 / 83** | Gerçek MySQL: CRUD, durum kodları, token, eşzamanlılık, kısıtlar, yeniden başlatınca kalıcılık |
 | Arayüz denetimi (Chromium) | **52 / 52** | Arayüzden yapılan her işlem API'ye gidip veritabanına yazılıyor mu? Hata mesajları gösteriliyor mu? |
 
@@ -46,6 +46,10 @@ Kaynak: *Web Tabanlı Teknolojiler Dönem Sonu Projesi* dokümanı (59 satır). 
 | R30 | Kayıt ve giriş zorunlu | ✅ | Sipariş, favori, yorum, profil ve tüm yönetim işlemleri giriş ister |
 | R31 | Kimlik doğrulama ve yetkilendirme mekanizması | ✅ | 401/403 ayrımı, başkasının siparişi/yorumu 403, `localStorage`'a "admin" yazmak işe yaramaz, kayıtta rol atanamaz |
 | R32 | Tüm işlevler çalışır; yalnızca arayüzü olan özellik yok | ✅ | Ölü bağlantı yok, boş düğme yok, sahte/statik veri yok, tarayıcıda JS hatası yok, beklenmeyen 5xx yok |
+
+## Swagger ile API doğrulaması
+
+Hocanın talebi üzerine API'nin tamamı Swagger UI ile belgelendi (`/api/documentation`). Belgedeki 47 işlemin her biri gerçek HTTP ile çağrıldı ve dönen durum kodunun belgede yazılı olduğu doğrulandı; ayrıca Swagger arayüzünden giriş → token → yetkili uç çağrısı denendi. Bu sırada `Accept` başlığı göndermeyen istemcide (curl, Postman) korumalı uçların 401 yerine 500 döndüğü bulunup düzeltildi.
 
 ## Bu kontrol sırasında bulunup düzeltilenler
 
